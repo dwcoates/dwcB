@@ -225,19 +225,19 @@
 ;;;;;; EMACS LISP ;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar dwcB-emacs-lisp-mode-map
-  (dwcB-add-major-map 'emacs-lisp-mode nil nil dwcB-lisp-mode-shared-map)
-  "Keymap used by dwcB for emacs-lisp-mode buffers."
-  )
+;; (defvar dwcB-emacs-lisp-mode-map
+;;   (dwcB-add-major-map 'emacs-lisp-mode nil nil dwcB-lisp-mode-shared-map)
+;;   "Keymap used by dwcB for emacs-lisp-mode buffers."
+;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;; CLOJURE ;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar dwcB-clojure-mode-map
-  (dwcB-add-major-map 'clojure-mode nil nil dwcB-lisp-mode-shared-map)
-  "Keymap used by dwcB for clojure-mode buffers."
-  )
+;; (defvar dwcB-clojure-mode-map
+;;   (dwcB-add-major-map 'clojure-mode nil nil dwcB-lisp-mode-shared-map)
+;;   "Keymap used by dwcB for clojure-mode buffers."
+;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; ORG MODE ;;;;;;;;;;;;;;;;;;;;;;;;;;;
