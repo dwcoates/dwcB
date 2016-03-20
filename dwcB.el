@@ -112,20 +112,37 @@ Else, merge keymaps into DWCB-ALIST's. Return cdr of DWCB-ALIST's new associatio
     (unless (or gen-binds env-binds wnd-binds)
       (error "Must provide general (:gen-binds), environment (:env-binds) or window (:wnd-binds) bindings "))
 
-    (let ((dwcB-map (make-sparse-keymap)))
+    (let ((dwcB-map (make-sparse-keymap))
+          (build-map (lambda (map binding)
+                       (define-key map (kbd (car binding)) (cdr binding)))))
       (when gen-binds
-        (mapc (lambda (binding)
-                (apply (apply-partially 'define-key dwcB-map) binding))
-              gen-binds))
-
-      (when base-map
-        (setq dwcB-map (append base-map dwcB-map))
-        (dwcB-add-to-keymap-alist (cons base-map dwcB-map) dwcB-keymap-alist)
-        ;; set parent of dwcB-map to be base-map's parent's dwcB version, otherwise simply base-map's parent.
-        (set-keymap-parent dwcB-map (or (cdr (assoc (keymap-parent base-map) dwcB-keymap-alist))
-                                        (keymap-parent (keymap-parent base)))))
-      (when mode
+        (mapc (apply-partially 'build-map dwcB-map) gen-binds)
         )
+      (when wnd-binds
+        (let ((wnd-map (make-sparse-map)))
+          (mapc (apply-partially 'build-map wnd-map) wnd-binds)
+          (define-key dwcB-map (kbd inter-buffer-prefix) wnd-map))
+        )
+      (when env-binds
+        (let ((env-map (make-sparse-map)))
+          (mapc (apply-partially 'build-map env-map) env-binds)
+          (define-key dwcB-map (kbd env-prefix) env-map))
+        )
+      (when base-map
+        (unless (and (symbolp base-map) (keymapp base-map))
+          (error ":base must be a keymap"))
+        (let* ((entry (assoc dwcB-keymap-alist base-map))
+               (parent (cdr (assoc dwcB-keymap-alist (keymap-parent base-map))))
+               )
+          (if entry
+              (setq (cdr entry) (make-composed-keymap dwcB-map base-map))
+              )
+          (setq dwcB-map (make-composed-keymap dwcB-map base-map)))
+      (when mode
+
+        )
+      )
+    ))
 
 (require 'default-bindings)
 
