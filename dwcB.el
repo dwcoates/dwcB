@@ -36,19 +36,6 @@ E.g., (assoc org-mode dwcB-mode-alist) returns the consing of the default org-mo
       (use-global-map global-map)
     ))
 
-(defun dwcB--update-maps ()
-  "If dwcB-mode is on, update minor maps, major map, and global map to be dwcB versions. Else, set maps to default states."
-  (mapc
-   (lambda ()
-     (if dwcB-mode
-         (setq) ;; return function that sets
-       ()
-       )
-     )
-   (append dwcB-mode-alist dwcB-keymap-alist)
-   )
-  (dwcB--update-major-map)
-  )
 
 (defun dwcB--deactivate-minor-map (MINOR-MODE)
   (let ((mode-map (assoc MINOR-MODE dwcB-minor-mode-alist)))
