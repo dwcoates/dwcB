@@ -213,7 +213,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   )
 
 (defun dwcB--save (MODE-MAP ALIST)
-  (let ((entry-mode-map (assoc (car MODE-MAP) ALIST)))
+  (let ((entry-mode-map (assoc (car MODE-MAP) (symbol-value ALIST))))
     (if entry-mode-map
         ;; amend set value in place. Don't want this to just add to list.
         ;; this can always just go if it causes problems
@@ -221,12 +221,12 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
         ;;       (make-composed-keymap `(,(cdr MODE-MAP)
         ;;                               ,(cdr entry-mode-map)))
         ;;       )
-        (add-to-list 'ALIST
+        (add-to-list ALIST
                      (cons (car MODE-MAP)
                            (make-composed-keymap `(,(cdr MODE-MAP)
                                                    ,(cdr entry-mode-map)))
                            ))
-      (add-to-list 'ALIST MODE-MAP)
+      (add-to-list ALIST MODE-MAP)
       )
     )
   )
@@ -266,14 +266,15 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
           (error ":base must be a keymap"))
         (setq dwcB-map (make-composed-keymap base-map dwcB-map))
         )
-      (when mode
-        (if (member mode minor-mode-list)
-            (print "add to minor mode list")
-          (print "add to major mode alist"))
-        )
-      )
-    )
-  )
+      (if mode
+          (let ((mode-map (cons mode dwcB-map)))
+            (if (member mode minor-mode-list)
+                (dwcB--save mode-map 'dwcB--minor-alist)
+              (dwcB--save mode-map 'dwcB--major-alist))
+            )
+        (setq dwcB--global-map (make-composed-keymap dwcB-map dwcB--global-map))
+        ))
+  ))
 
 ;; (require 'default-bindings)
 
