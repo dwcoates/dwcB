@@ -1,159 +1,115 @@
-(keyboard-translate ?\C-i ?\H-i)
+;;; Code:
 
+(dwcB-configure
+ :base global-map
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;; KEY GENERICS ;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Direction
-(defconst dwcB-backward-key "j")
-(defconst dwcB-forward-key "l")
-(defconst dwcB-downward-key "k")
-(defconst dwcB-upward-key "i")
-;; Beginning/End
-(defconst dwcB-beginning-key "o")
-(defconst dwcB-end-key "p")
-;; Search
-(defconst dwcB-search-alpha-key "y")
-(defconst dwcB-search-beta-key "n")
-;; Bigger/Smaller
-(defconst dwcB-bigger-key ">")
-(defconst dwcB-smaller-key "<")
-;; Kill
-(defconst dwcB-kill-element-key "d")
-(defconst dwcB-kill-big-key "a")
-(defconst dwcB-kill-or-save-key "s")
-;; Yank
-(defconst dwcB-yank-key "f")
-;; Transpose
-(defconst dwcB-transpose-key "t")
+ :gen-binds
 
+ `(
+   ;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;;;; NAVIGATION ;;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;; INTRA-BUFFER ;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;; Direction
+   (,(concat "C-" dwcB-backward-key) . backward-char)
+   (,(concat "C-" dwcB-forward-key) . forward-char)
+   (,(concat "H-" dwcB-upward-key) . previous-line)
+   (,(concat "C-" dwcB-downward-key) . next-line)
+   (,(concat "M-" dwcB-backward-key) . backward-word)
+   (,(concat "M-" dwcB-forward-key) . forward-word)
+   (,(concat "M-" dwcB-downward-key) . forward-paragraph)
+   (,(concat "M-" dwcB-upward-key) . backward-paragraph)
+   (,(concat "C-S-" dwcB-forward-key) . scroll-left)
+   (,(concat "C-S-" dwcB-backward-key) . scroll-right)
+   (,(concat "C-S-" dwcB-upward-key) . scroll-down-command)
+   (,(concat "C-S-" dwcB-downward-key) . scroll-up-command)
+   (,(concat "C-M-" dwcB-upward-key) . scroll-other-window-down)
+   (,(concat "C-M-" dwcB-downward-key) . scroll-other-window)
+   ;; Beginning/End
+   (,(concat "C-" dwcB-beginning-key) . beginning-of-line)
+   (,(concat "C-" dwcB-end-key) . end-of-line)
+   (,(concat "M-" dwcB-end-key) . forward-to-indentation)
+   (,(concat "M-" dwcB-beginning-key) . backward-to-indentation)
+   (,(concat "C-M-" dwcB-beginning-key) . beginning-of-buffer)
+   (,(concat "C-M-" dwcB-end-key) . end-of-buffer)
+   ;; Bigger/Smaller
+   (,(concat "C-" dwcB-smaller-key) . narrow-to-region)
+   (,(concat "M-" dwcB-smaller-key) . narrow-to-page)
+   (,(concat "C-" dwcB-bigger-key) . widen)
+   ;; Search
+   (,(concat "C-" dwcB-search-alpha-key) . isearch-forward)
+   (,(concat "C-" dwcB-search-beta-key) . isearch-backward)
+   (,(concat "C-S-M-" dwcB-upward-key) . upcase-region)
+   (,(concat "C-S-M-" dwcB-downward-key) . downcase-region)
 
-;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;; NAVIGATION ;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;
-;; Direction
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-backward-key)) 'backward-char)
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-forward-key)) 'forward-char)
-(define-key dwcB-global-map (kbd (concat "H-" dwcB-upward-key)) 'previous-line)
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-downward-key)) 'next-line)
-;
-(define-key dwcB-global-map (kbd (concat "M-" dwcB-backward-key)) 'backward-word)
-(define-key dwcB-global-map (kbd (concat "M-" dwcB-forward-key)) 'forward-word)
-(define-key dwcB-global-map (kbd (concat "M-" dwcB-downward-key)) 'forward-paragraph)
-(define-key dwcB-global-map (kbd (concat "M-" dwcB-upward-key)) 'backward-paragraph)
-;
-(define-key dwcB-global-map (kbd (concat "C-S-" dwcB-forward-key)) 'scroll-left)
-(define-key dwcB-global-map (kbd (concat "C-S-" dwcB-backward-key)) 'scroll-right)
-(define-key dwcB-global-map (kbd (concat "C-S-" dwcB-upward-key)) 'scroll-down-command)
-(define-key dwcB-global-map (kbd (concat "C-S-" dwcB-downward-key)) 'scroll-up-command)
-;; Beginning/End
-(define-key dwcB-global-map (kbd (concat "C-M-" dwcB-upward-key)) 'scroll-other-window-down)
-(define-key dwcB-global-map (kbd (concat "C-M-" dwcB-downward-key)) 'scroll-other-window)
-;
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-beginning-key)) 'beginning-of-line)
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-end-key)) 'end-of-line)
-;
-(define-key dwcB-global-map (kbd (concat "M-" dwcB-end-key)) 'forward-to-indentation)
-(define-key dwcB-global-map (kbd (concat "M-" dwcB-beginning-key)) 'backward-to-indentation)
-;
-(define-key dwcB-global-map (kbd (concat "C-M-" dwcB-beginning-key)) 'beginning-of-buffer)
-(define-key dwcB-global-map (kbd (concat "C-M-" dwcB-end-key)) 'end-of-buffer)
-;; Bigger/Smaller
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-smaller-key)) 'narrow-to-region)
-(define-key dwcB-global-map (kbd (concat "M-" dwcB-smaller-key)) 'narrow-to-page)
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-bigger-key)) 'widen)
-;; Search
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-search-alpha-key)) 'isearch-forward)
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-search-beta-key)) 'isearch-backward)
-;; Misc
-(define-key dwcB-global-map (kbd "C-'") 'recenter-top-bottom)
-;;;;;;;;;;;;;;;;;;;;;
-;;;;;; EDITING ;;;;;;
-;;;;;;;;;;;;;;;;;;;;;
-;; Direction
-(define-key dwcB-global-map (kbd (concat "C-S-M-" dwcB-upward-key)) 'upcase-region)
-(define-key dwcB-global-map (kbd (concat "C-S-M-" dwcB-downward-key)) 'downcase-region)
-;; Kill
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-kill-big-key)) 'kill-line)
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-kill-or-save-key)) 'kill-region)
-;
-(define-key dwcB-global-map (kbd (concat "M-" dwcB-kill-big-key)) 'kill-sentence)
-(define-key dwcB-global-map (kbd (concat "M-" dwcB-kill-or-save-key)) 'kill-ring-save)
-;
-(define-key dwcB-global-map (kbd "C-z") 'zap-to-char)
-;; Whitespace
-(define-key dwcB-global-map (kbd "C-v") 'delete-horizontal-space)
-(define-key dwcB-global-map (kbd "M-v") 'delete-indentation)
-;; Transpose
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-transpose-key)) 'transpose-chars)
-(define-key dwcB-global-map (kbd (concat "M-" dwcB-transpose-key)) 'transpose-words)
-;; Yank
-(define-key dwcB-global-map (kbd (concat "C-" dwcB-yank-key)) 'yank)
+   ;;;;;;;;;;;;;;;;;;;;;
+   ;;;;;; EDITING ;;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;
 
+   ;; Kill
+   (,(concat "C-" dwcB-kill-big-key) . kill-line)
+   (,(concat "C-" dwcB-kill-or-save-key) . kill-region)
+   (,(concat "M-" dwcB-kill-big-key) . kill-sentence)
+   (,(concat "M-" dwcB-kill-or-save-key) . kill-ring-save)
+   ("C-z" . zap-to-char)
+   ("C-v" . delete-horizontal-space)
+   ("M-v" . delete-indentation)
+   ;; Transpose
+   (,(concat "C-" dwcB-transpose-key) . transpose-chars)
+   (,(concat "M-" dwcB-transpose-key) . transpose-words)
+   ;; Yank
+   (,(concat "C-" dwcB-yank-key) . yank))
 
+ :wnd-binds
 
+ `(
+   ;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;;;; NAVIGATION ;;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;; INTER-BUFFER ;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   (,dwcB-forward-key . next-buffer)
+   (,dwcB-backward-key . previous-buffer)
+   ("U" . switch-to-buffer-other-window)
+   ("u" . switch-to-buffer)
+   ("C-u" . helm-buffers-list)
+   ("o" . other-frame)
+   ("O" . other-window)
+   ("/" . dired-jump)
+   ("?" . dired-jump-other-window)
+   ;; Search
+   (,dwcB-search-alpha-key . ido-find-file)
+   (,(concat "C-" dwcB-search-alpha-key) . ido-find-file-other-window)
+   (,(upcase dwcB-search-alpha-key) . ido-find-file-other-frame)
 
-;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;; NAVIGATION ;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;
-(define-key dwcB-inter-buffer-map (kbd dwcB-forward-key) 'next-buffer)
-(define-key dwcB-inter-buffer-map (kbd dwcB-backward-key) 'previous-buffer)
-;
-(define-key dwcB-inter-buffer-map (kbd "U") 'switch-to-buffer-other-window)
-(define-key dwcB-inter-buffer-map (kbd "u") 'switch-to-buffer)
-(define-key dwcB-inter-buffer-map (kbd "C-u") 'helm-buffers-list)
-;
-(define-key dwcB-inter-buffer-map (kbd "o") 'other-frame)
-(define-key dwcB-inter-buffer-map (kbd "O") 'other-window)
-;; DIRED
-(define-key dwcB-inter-buffer-map (kbd "/") 'dired-jump)
-(define-key dwcB-inter-buffer-map (kbd "?") 'dired-jump-other-window)
-;; FIND FILE
-(define-key dwcB-inter-buffer-map (kbd dwcB-search-alpha-key) 'ido-find-file)
-(define-key dwcB-inter-buffer-map (kbd (concat "C-" dwcB-search-alpha-key)) 'ido-find-file-other-window)
-(define-key dwcB-inter-buffer-map (kbd (upcase dwcB-search-alpha-key)) 'ido-find-file-other-frame)
-;;;;;;;;;;;;;;;;;;;;;
-;;;;;; EDITING ;;;;;;
-;;;;;;;;;;;;;;;;;;;;;
-;; RESIZE
-(define-key dwcB-inter-buffer-map (kbd dwcB-bigger-key) 'enlarge-window-horizontally)
-(define-key dwcB-inter-buffer-map (kbd dwcB-smaller-key) 'shrink-window-horizontally)
-(define-key dwcB-inter-buffer-map (kbd (concat "C-" dwcB-bigger-key)) 'enlarge-window)
-(define-key dwcB-inter-buffer-map (kbd (concat "M-" dwcB-smaller-key)) 'shrink-window)
-;
-(define-key dwcB-inter-buffer-map (kbd "b") 'balance-windows)
-(define-key dwcB-inter-buffer-map (kbd "B") 'shrink-window-if-larger-than-buffer)
-(define-key dwcB-inter-buffer-map (kbd "v") 'golden-ratio)
-(define-key dwcB-inter-buffer-map (kbd "V") 'golden-ratio-mode)
-;
-(define-key dwcB-inter-buffer-map (kbd "z") 'suspend-frame)
-;; SPLIT
-(define-key dwcB-inter-buffer-map (kbd (upcase dwcB-forward-key)) 'split-window-right)
-(define-key dwcB-inter-buffer-map (kbd (upcase dwcB-backward-key)) 'split-horizontally)
-(define-key dwcB-inter-buffer-map (kbd (upcase dwcB-upward-key)) 'split-window-vertically)
-(define-key dwcB-inter-buffer-map (kbd (upcase dwcB-downward-key)) 'split-window-below)
-;; KILL
-(define-key dwcB-inter-buffer-map (kbd dwcB-kill-element-key) 'kill-buffer-and-window)
-(define-key dwcB-inter-buffer-map (kbd (upcase dwcB-kill-element-key)) 'kill-some-buffers)
-(define-key dwcB-inter-buffer-map (kbd (concat "C-" dwcB-kill-element-key)) 'kill-buffer)
-;
-(define-key dwcB-inter-buffer-map (kbd (concat "3 " (upcase dwcB-kill-element-key))) 'delete-other-frames)
-(define-key dwcB-inter-buffer-map (kbd (concat "3 " dwcB-kill-element-key)) 'delete-frame)
-;; SAVE
-(define-key dwcB-inter-buffer-map (kbd (concat "C-" dwcB-kill-or-save-key)) 'save-buffer)
-(define-key dwcB-inter-buffer-map (kbd (upcase dwcB-kill-or-save-key)) 'write-file)
-(define-key dwcB-inter-buffer-map (kbd (concat "M-" dwcB-kill-or-save-key)) 'save-some-bueffer)
+   ;;;;;;;;;;;;;;;;;;;;;
+   ;;;;;; EDITING ;;;;;;
+   ;;;;;;;;;;;;;;;;;;;;;
 
-
-
+   ;; RESIZE
+   (,dwcB-bigger-key . enlarge-window-horizontally)
+   (,dwcB-smaller-key . shrink-window-horizontally)
+   (,(concat "C-" dwcB-bigger-key) . enlarge-window)
+   (,(concat "M-" dwcB-smaller-key) . shrink-window)
+   ("b" . balance-windows)
+   ("B" . shrink-window-if-larger-than-buffer)
+   ("v" . golden-ratio)
+   ("V" . golden-ratio-mode)
+   ("z" . suspend-frame)
+   (,(upcase dwcB-forward-key) . split-window-right)
+   (,(upcase dwcB-backward-key) . split-horizontally)
+   (,(upcase dwcB-upward-key) . split-window-vertically)
+   (,(upcase dwcB-downward-key) . split-window-below)
+   ;; KILL
+   (,dwcB-kill-element-key . kill-buffer-and-window)
+   (,(upcase dwcB-kill-element-key) . kill-some-buffers)
+   (,(concat "C-" dwcB-kill-element-key) . kill-buffer)
+   (,(concat "3 " (upcase dwcB-kill-element-key)) . delete-other-frames)
+   (,(concat "3 " dwcB-kill-element-key) . delete-frame)
+   ;; SAVE
+   (,(concat "C-" dwcB-kill-or-save-key) . save-buffer)
+   (,(upcase dwcB-kill-or-save-key) . write-file)
+   (,(concat "M-" dwcB-kill-or-save-key) . save-some-bueffer))
+ )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;; GENERAL LISP ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -266,3 +222,6 @@
 
 
 (provide 'default-bindings)
+
+
+(define-key dwcB--global-map (kbd "C-'") 'recenter-top-bottom)
