@@ -48,11 +48,11 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
 ;;;;;;;;;;;; SAVES ;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar dwcB--major-alist '()
+(defvar dwcB--primary-alist '()
   "first searched when setting local-map. Then looks outside")
 (defvar dwcB--minor-alist '())
 (defvar dwcB--minor-alist--saved '() "list of keymaps to be appended to minor-mode-map-alist")
-(defvar dwcB--major-alist--saved '() "list of tuples (mode, map) to be restored")
+(defvar dwcB--primary-alist--saved '())
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; DWCB ;;;;;;;;;;;;;
@@ -72,14 +72,16 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   (progn
     (keyboard-translate ?\C-i ?\H-i)
     (dwcB--set-global-map)
-    ;;     (add-hook 'after-change-major-mode-hook 'dwcB-major-mode-update)
+    ;; (add-hook 'after-change-major-mode-hook 'dwcB-major-mode-update)
+    ;; (dwcB-major-mode-update)
     ))
 
 (defun dwcB--teardown ()
   (progn
     (keyboard-translate ?\C-i ?\C-i)
     (dwcB--reset-global-map)
-    ;;   (remove-hook 'after-change-major-mode-hook 'dwcB-major-mode-update)
+    ;; (remove-hook 'after-change-major-mode-hook 'dwcB-major-mode-update)
+    ;; (dwcB-major-mode-update)
    ))
 
 (defun dwcB--set-global-map ()
@@ -97,7 +99,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
 
 (defun dwcB--major-mode-update ()
   "Switch to corresponding dwcB keymap for the current major mode."
-  (let ((mode-map (assoc major-mode dwcB--major-alist)))
+  (let ((mode-map (assoc major-mode dwcB--primary-alist)))
     (when mode-map
       (use-local-map (cdr mode-map))
     ))
@@ -123,14 +125,23 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   )
 
 (defun dwcB-configure (&rest args)
-  (let* ((mode (plist-get args :mode))
+  "Configures dwcB binding.
+:key - not provided to map to dwcB global map. A minor mode or major mode name to configure
+bindings for a minor or major mode. A keymap name to define a dwcB keymap behind the scenes
+(useful if you want to build map hierarchies using :parent).
+:base - A base map with which to compose the provided bindings
+:parent - A parent map from which the produces bindings should inherit
+:gen-binds - Bindings in the general namespace (i.e., not necessarily under a prefix key)
+:env-binds - Bindings under the major prefix
+:wnd-binds - Bindings under the window prefix"
+  (let* ((key (plist-get args :key))
          (base-map (plist-get args :base))
          (parent-map (plist-get args :parent))
          (gen-binds (plist-get args :gen-binds))
          (env-binds (plist-get args :env-binds))
          (wnd-binds (plist-get args :wnd-binds)))
-    (unless (symbolp mode)
-      (error ":mode must be a symbol"))
+    (unless (symbolp key)
+      (error ":key must be a symbol"))
     (unless (or gen-binds env-binds wnd-binds)
       (error
        "Must provide general (:gen-binds), environment (:env-binds) or window (:wnd-binds) bindings."))
@@ -158,12 +169,13 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
         ;; This might be backwards. base-map might be overlappign dwcB-map, not sure
         (setq dwcB-map (make-composed-keymap base-map dwcB-map))
         )
-      (if mode
-          (let ((mode-map (cons mode dwcB-map)))
-            (if (member mode minor-mode-list)
+
+
+      (if key
+          (let ((mode-map (cons key dwcB-map)))
+            (if (member key minor-mode-list)
                 (dwcB--save mode-map 'dwcB--minor-alist)
-              (dwcB--save mode-map 'dwcB--major-alist))
-            )
+              (dwcB--save mode-map 'dwcB--primary-alist)))
         (setq dwcB--global-map (make-composed-keymap dwcB-map dwcB--global-map))
         ))
   ))
