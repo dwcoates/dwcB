@@ -65,7 +65,6 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   (if dwcB-mode
       (dwcB--setup)
     (dwcB--teardown))
-  (dwcB--major-mode-update)
   )
 
 (defun dwcB--setup ()
@@ -73,6 +72,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
     (keyboard-translate ?\C-i ?\H-i)
     (dwcB--set-global-map)
     (add-hook 'after-change-major-mode-hook 'dwcB--major-mode-update)
+    (dwcB--major-mode-update)
     ))
 
 (defun dwcB--teardown ()
@@ -80,6 +80,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
     (keyboard-translate ?\C-i ?\C-i)
     (dwcB--reset-global-map)
     (remove-hook 'after-change-major-mode-hook 'dwcB--major-mode-update)
+    (dwcB--major-mode-clear)
    ))
 
 (defun dwcB--set-global-map ()
@@ -99,8 +100,17 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   "Switch to corresponding dwcB keymap for the current major mode."
   (let ((mode-map (assoc major-mode dwcB--primary-alist)))
     (when mode-map
+      (dwcB--save (cons major-mode (current-local-map)) 'dwcB--primary-alist--saved)
       (use-local-map (cdr mode-map))
     ))
+  )
+
+(defun dwcB--major-mode-clear ()
+  (let ((mode-map  (assoc major-mode dwcB--primary-alist--saved)))
+    (when mode-map
+      (use-local-map (cdr mode-map))
+      )
+    )
   )
 
 (defun dwcB--save (MODE-MAP ALIST)
