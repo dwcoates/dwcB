@@ -72,14 +72,14 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   (progn
     (keyboard-translate ?\C-i ?\H-i)
     (dwcB--set-global-map)
-    (add-hook 'after-change-major-mode-hook 'dwcB-major-mode-update)
+    (add-hook 'after-change-major-mode-hook 'dwcB--major-mode-update)
     ))
 
 (defun dwcB--teardown ()
   (progn
     (keyboard-translate ?\C-i ?\C-i)
     (dwcB--reset-global-map)
-    (remove-hook 'after-change-major-mode-hook 'dwcB-major-mode-update)
+    (remove-hook 'after-change-major-mode-hook 'dwcB--major-mode-update)
    ))
 
 (defun dwcB--set-global-map ()
@@ -141,35 +141,44 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
          (wnd-binds (plist-get args :wnd-binds)))
     (unless (symbolp key)
       (error ":key must be a symbol"))
-    (unless (or gen-binds env-binds wnd-binds)
+    (unless (symbolp parent-map)
+      (error ":key must be a symbol"))
+    (unless (or (or gen-binds env-binds wnd-binds)
+                (and key (or parent-map base-map)))
       (error
        "Must provide general (:gen-binds), environment (:env-binds) or window (:wnd-binds) bindings."))
     (let ((dwcB-map (make-sparse-keymap))
           (build-map (lambda (map binding)
                        (define-key map (kbd (car binding)) (cdr binding)))))
       (when gen-binds
-        (mapc (apply-partially (symbol-value 'build-map) dwcB-map) gen-binds)
+        (mapc (apply-partially build-map dwcB-map) gen-binds)
         )
       (when wnd-binds
         (let ((wnd-map (make-sparse-keymap)))
-          (mapc (apply-partially (symbol-value 'build-map) wnd-map) wnd-binds)
-          (define-key dwcB-map (kbd dwcB-inter-buffer-prefix) 'wnd-map)
+          (mapc (apply-partially build-map wnd-map) wnd-binds)
+          (define-key dwcB-map (kbd dwcB-inter-buffer-prefix) wnd-map)
           )
         )
       (when env-binds
         (let ((env-map (make-sparse-keymap)))
-          (mapc (apply-partially (symbol-value 'build-map) env-map) env-binds)
-          (define-key dwcB-map (kbd dwcB-major-prefix) 'env-map)
+          (mapc (apply-partially build-map env-map) env-binds)
+          (define-key dwcB-map (kbd dwcB-major-prefix) env-map)
           )
         )
       (when base-map
         (unless (keymapp base-map)
           (error ":base must be a keymap"))
-        ;; This might be backwards. base-map might be overlappign dwcB-map, not sure
-        (setq dwcB-map (make-composed-keymap base-map dwcB-map))
+        (setq dwcB-map (make-composed-keymap dwcB-map base-map))
         )
       (when parent-map
-        (set-keymap-parent dwcB-map parent-map))
+        (if (and (boundp parent-map) (keymapp (symbol-value parent-map)))
+            (set-keymap-parent dwcB-map parent-map)
+          (let ((entry (assoc parent-map dwcB--primary-alist)))
+            (if entry
+                (set-keymap-parent dwcB-map (cdr entry))
+              (error "parent-map must be a keymap or a known dwcB key")))
+          ))
+
       (if key
           (let ((mode-map (cons key dwcB-map)))
             (if (member key minor-mode-list)
