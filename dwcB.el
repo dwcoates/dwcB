@@ -64,24 +64,22 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   :global t
   (if dwcB-mode
       (dwcB--setup)
-    (dwcB--teardown)
-    )
+    (dwcB--teardown))
+  (dwcB--major-mode-update)
   )
 
 (defun dwcB--setup ()
   (progn
     (keyboard-translate ?\C-i ?\H-i)
     (dwcB--set-global-map)
-    ;; (add-hook 'after-change-major-mode-hook 'dwcB-major-mode-update)
-    ;; (dwcB-major-mode-update)
+    (add-hook 'after-change-major-mode-hook 'dwcB-major-mode-update)
     ))
 
 (defun dwcB--teardown ()
   (progn
     (keyboard-translate ?\C-i ?\C-i)
     (dwcB--reset-global-map)
-    ;; (remove-hook 'after-change-major-mode-hook 'dwcB-major-mode-update)
-    ;; (dwcB-major-mode-update)
+    (remove-hook 'after-change-major-mode-hook 'dwcB-major-mode-update)
    ))
 
 (defun dwcB--set-global-map ()
@@ -124,16 +122,17 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
     )
   )
 
+
+;; "Configures dwcB binding.
+;; :key - not provided to map to dwcB global map. A minor mode or major mode name to configure
+;; bindings for a minor or major mode. A keymap name to define a dwcB keymap behind the scenes
+;; (useful if you want to build map hierarchies using :parent).
+;; :base - A base map with which to compose the provided bindings
+;; :parent - A parent map from which the produces bindings should inherit
+;; :gen-binds - Bindings in the general namespace (i.e., not necessarily under a prefix key)
+;; :env-binds - Bindings under the major prefix
+;; :wnd-binds - Bindings under the window prefix"
 (defun dwcB-configure (&rest args)
-  "Configures dwcB binding.
-:key - not provided to map to dwcB global map. A minor mode or major mode name to configure
-bindings for a minor or major mode. A keymap name to define a dwcB keymap behind the scenes
-(useful if you want to build map hierarchies using :parent).
-:base - A base map with which to compose the provided bindings
-:parent - A parent map from which the produces bindings should inherit
-:gen-binds - Bindings in the general namespace (i.e., not necessarily under a prefix key)
-:env-binds - Bindings under the major prefix
-:wnd-binds - Bindings under the window prefix"
   (let* ((key (plist-get args :key))
          (base-map (plist-get args :base))
          (parent-map (plist-get args :parent))
@@ -169,8 +168,8 @@ bindings for a minor or major mode. A keymap name to define a dwcB keymap behind
         ;; This might be backwards. base-map might be overlappign dwcB-map, not sure
         (setq dwcB-map (make-composed-keymap base-map dwcB-map))
         )
-
-
+      (when parent-map
+        (set-keymap-parent dwcB-map parent-map))
       (if key
           (let ((mode-map (cons key dwcB-map)))
             (if (member key minor-mode-list)
@@ -180,8 +179,7 @@ bindings for a minor or major mode. A keymap name to define a dwcB keymap behind
         ))
   ))
 
-
-;(require 'default-bindings)
+(load "~/workspace/dwcB/default-bindings.el")
 
 (provide 'dwcB)
 
