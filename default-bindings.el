@@ -1,7 +1,5 @@
 ;;; Code:
 
-(require 'use-package)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;; DWCB  GLOBAL ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -112,34 +110,33 @@
 
 
 (dwcB-configure
- :key lisp-map
+ :key 'lisp-map
  :env-binds `(;; Beg/End
-              (dwcB-beginning-key  sp-beginning-of-sexp)
-              (dwcB-end-key .  sp-end-of-sexp)
+              (,dwcB-beginning-key . sp-beginning-of-sexp)
+              (,dwcB-end-key .  sp-end-of-sexp)
               ;; Upward/Downward
-              (dwcB-downward-key  sp-down-sexp)
-              (dwcB-upward-key  sp-up-sexp)
-              ((concat "C-" dwcB-downward-key)  sp-backward-down-sexp)
-              ((concat "C-" dwcB-upward-key)  sp-backward-up-sexp)
+              (,dwcB-downward-key . sp-down-sexp)
+              (,dwcB-upward-key . sp-up-sexp)
+              (,(concat "C-" dwcB-upward-key) . sp-backward-up-sexp)
               ;; Forward/Backward
-              (dwcB-forward-key  sp-forward-sexp)
-              (dwcB-backward-key  sp-backward-sexp)
-              ((concat "C-" dwcB-forward-key)   sp-forward-symbol)
-              ((concat "C-" dwcB-backward-key)  sp-backward-symbol)
-              ((concat "C-" (upcase dwcB-forward-key)) sp-next-sexp)
-              ((concat "C-" (upcase dwcB-backward-key)) sp-previous-sexp)
+              (,dwcB-forward-key . sp-forward-sexp)
+              (,dwcB-backward-key . sp-backward-sexp)
+              (,(concat "C-" dwcB-forward-key)  . sp-forward-symbol)
+              (,(concat "C-" dwcB-backward-key) . sp-backward-symbol)
+              (,(concat "C-" (upcase dwcB-forward-key)) . sp-next-sexp)
+              (,(concat "C-" (upcase dwcB-backward-key)) . sp-previous-sexp)
               ;; Slurp/Barf
-              ("e"  sp-forward-slurp-sexp)
-              ("r"  sp-forward-barf-sexp)
-              ("w"   sp-backward-slurp-sexp)
-              ("q"   sp-backward-barf-sexp)
+              ("e" . sp-forward-slurp-sexp)
+              ("r" . sp-forward-barf-sexp)
+              ("w" . sp-backward-slurp-sexp)
+              ("q" . sp-backward-barf-sexp)
               ;; Transpose
-              (dwcB-transpose-key  sp-transpose-sexp)
+              (,dwcB-transpose-key . sp-transpose-sexp)
               ;; Kill and Save
-              (dwcB-kill-element-key sp-kill-sexp)
-              ((concat "C-" dwcB-kill-element-key) sp-kill-hybrid-sexp)
-              ((concat "C-" (upcase dwcB-kill-element-key)) sp-backward-kill-sexp)
-              ((concat "M-" dwcB-kill-element-key) sp-copy-sexp)
+              (,dwcB-kill-element-key . sp-kill-sexp)
+              (,(concat "C-" dwcB-kill-element-key) . sp-kill-hybrid-sexp)
+              (,(concat "C-" (upcase dwcB-kill-element-key)) . sp-backward-kill-sexp)
+              (,(concat "M-" dwcB-kill-element-key) . sp-copy-sexp)
               )
  )
 
@@ -149,17 +146,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (dwcB-configure
- :key emacs-lisp-mode
- :parent lisp-map
+ :key 'emacs-lisp-mode
+ :parent 'lisp-map
  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;; CLOJURE ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;;;;;;;;;;;;;;;;;;;;;;;;; CLOJURE ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;n ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (dwcB-configure
- :key clojure-mode
- :parent lisp-map
+ :key 'clojure-mode
+ :parent 'lisp-map
  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
