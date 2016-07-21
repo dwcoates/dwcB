@@ -41,6 +41,7 @@
               (,(concat "C-" dwcB-search-beta-key) . isearch-backward)
               (,(concat "C-S-M-" dwcB-upward-key) . upcase-region)
               (,(concat "C-S-M-" dwcB-downward-key) . downcase-region)
+              (,(concat "M-" dwcB-search-alpha) . helm-swoop)
    ;;;;;;;;;;;;;;;;;;;;;
    ;;;;;; EDITING ;;;;;;
    ;;;;;;;;;;;;;;;;;;;;;
@@ -74,6 +75,10 @@
               (,dwcB-search-alpha-key . ido-find-file)
               (,(concat "C-" dwcB-search-alpha-key) . ido-find-file-other-window)
               (,(upcase dwcB-search-alpha-key) . ido-find-file-other-frame)
+              ;; Search
+              (,dwcB-search-alpha . helm-mini)
+              (,dwcB-search-alpha . helm-buffers-list)
+              (,dwcB-search-beta . helm-find-files)
    ;;;;;;;;;;;;;;;;;;;;;
    ;;;;;; EDITING ;;;;;;
    ;;;;;;;;;;;;;;;;;;;;;
@@ -150,9 +155,9 @@
  :parent 'lisp-map
  )
 
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;;;;;;;;;;;;;;;;;;;;;;;;; CLOJURE ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;n ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;; CLOJURE ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (dwcB-configure
  :key 'clojure-mode
@@ -189,7 +194,31 @@
               )
  )
 
+;; (dwcB-configure
+;;  :key 'magit-mode
+;;  :get-binds `(
+;;               ;; Direction
+;;               ))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;; HELM MODE ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(dwcB-configure
+ :key 'helm-mode
+ :gen-binds `(
+              ;; Direction
+              (,dwcB-next-key . helm-next-line)
+              (,dwcB-previous-key . helm-previous-line)
+              (,dwcB-forward-key . helm-next-page)
+              (,dwcB-backward-key . helm-previous-page)
+              ;; Search
+              )
+ )
+
+
+
+
+
 (provide 'default-bindings)
-
-
-(define-key dwcB--global-map (kbd "C-'") 'recenter-top-bottom)
