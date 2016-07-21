@@ -163,27 +163,31 @@
 ;;;;;;;;;;;;;;;;;;;;;;;; ORG MODE ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (defvar dwcB-org-mode-map
-;;   (dwcB-add-major-map 'org-mode nil 'org-mode-map (keymap-parent org-mode-map))
-;;   "Keymap used by dwcB for org-mode buffers."
-;;   )
-
-
-;; (define-key dwcB-org-mode-map
-;;   (kbd (concat "C-" dwcB-downward-key))  nil)
-;; (define-key dwcB-org-mode-map
-;;   (kbd (concat "C-" dwcB-upward-key))  nil)
-;; (define-key dwcB-org-mode-map
-;;   (kbd (concat "C-" dwcB-backward-key))  nil)
-;; (define-key dwcB-org-mode-map
-;;   (kbd (concat "C-" dwcB-forward-key))  nil)
-
-
-
-;; (setq dwcB-org-mode-prefix-map (make-sparse-keymap))
-;; (define-key dwcB-org-mode-map (kbd dwcB-major-prefix) dwcB-org-mode-prefix-map)
-
-
+(dwcB-configure
+ :key 'org-mode
+ :gen-binds `(
+              ;; Kill
+              (,(concat "C-" dwcB-kill-big-key) . org-kill-line)
+              ;; Beg/End
+              (,(concat "C-" dwcB-beginning-key) . org-beginning-of-line)
+              (,(concat "C-" dwcB-end-key) . org-end-of-line)
+              )
+ :env-binds `(;; Direction
+              (,(concat "C-" dwcB-forward-key) . org-forward-heading-same-level)
+              (,(concat "C-" dwcB-backward-key) . org-previous-heading-same-level)
+              (,(concat "C-" dwcB-upward-key) . outline-next-visible-heading)
+              (,(concat "C-" dwcB-downward-key) . outling-previous-visible-heading)
+              ;; Beg/Eng
+              ;; Bigger/Smaller
+              (,dwcB-bigger-key . widen)
+              (,dwcB-smaller-key . org-narrow-to-element)
+              (,(concat "C-" dwcB-smaller-key) . org-narrow-to-subtree)
+              (,(concat "C-" dwcB-smaller-key) . org-narrow-to-block)
+              ;; Search
+              ;; Misc
+              ("+" . org-capture)
+              )
+ )
 
 (provide 'default-bindings)
 
