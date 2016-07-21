@@ -1,5 +1,8 @@
 ;;; Code:
 
+;; temp
+(add-to-list 'load-path "~/workspace/dwcB")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;; KEY GENERICS ;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -73,7 +76,8 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
     (dwcB--set-global-map)
     (add-hook 'after-change-major-mode-hook 'dwcB--major-mode-update)
     (dwcB--major-mode-update)
-    (dwcB--setup-minor-maps)
+    ;; added as workaround to helm's wild and whacky handing of keymaps. Oh well.
+    (add-hook 'post-command-hook 'dwcB--setup-minor-maps)
     ))
 
 (defun dwcB--teardown ()
@@ -82,6 +86,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
     (dwcB--reset-global-map)
     (remove-hook 'after-change-major-mode-hook 'dwcB--major-mode-update)
     (dwcB--major-mode-clear)
+    (remove-hook 'post-command-hook 'dwcB--setup-minor-maps)
     (dwcB--teardown-minor-maps)
    ))
 
@@ -99,12 +104,12 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   )
 
 (defun dwcB--setup-minor-maps ()
-  (setq dwcB--minor-alist--saved minor-mode-map-alist)
-  (setq minor-mode-map-alist (append dwcB--minor-alist minor-mode-map-alist))
+  (setq dwcB--minor-alist--saved minor-mode-overriding-map-alist)
+  (setq minor-mode-overriding-map-alist dwcB--minor-alist)
   )
 
 (defun dwcB--teardown-minor-maps ()
-  (setq minor-mode-map-alist dwcB--minor-alist--saved)
+  (setq minor-mode-overriding-map-alist dwcB--minor-alist--saved)
   )
 
 (defun dwcB--major-mode-update ()
@@ -169,7 +174,8 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
     (unless (or (or gen-binds env-binds wnd-binds)
                 (and key (or parent-map base-map)))
       (error
-       "Must provide general (:gen-binds), environment (:env-binds) or window (:wnd-binds) bindings."))
+       "Must provide general (:gen-binds), environment (:env-binds) or
+       window (:wnd-binds) bindings."))
     (let ((dwcB-map (make-sparse-keymap))
           (build-map (lambda (map binding)
                        (define-key map (kbd (car binding)) (cdr binding)))))
@@ -195,7 +201,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
         )
       (when parent-map
         (if (and (boundp parent-map) (keymapp (symbol-value parent-map)))
-            (set-keymap-parent dwcB-map parent-map)
+            (set-keymap-parent dwcB-map (symbol-value parent-map))
           (let ((entry (assoc parent-map dwcB--primary-alist)))
             (if entry
                 (set-keymap-parent dwcB-map (cdr entry))
@@ -211,7 +217,8 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
         ))
   ))
 
-(load "~/workspace/dwcB/default-bindings.el")
+
+(require 'default-bindings)
 
 (provide 'dwcB)
 
