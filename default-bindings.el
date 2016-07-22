@@ -171,6 +171,9 @@
 (dwcB-configure
  :key 'emacs-lisp-mode
  :parent 'lisp-map
+ :env-binds `(
+              (,dwcB-interpret-key . ielm)
+              )
  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
