@@ -2,14 +2,113 @@
 
 Emacs minor mode for a (sort of) radical keybinding scheme
 
-* Usage
-
+* Key Generics
+Generics for categorizing most common commands
 #+begin_src emacs-lisp
-  (dwcB configure
-        :key 'emacs-lisp-mode
-        :parent 'lisp-mode
-        :gen-binds 
-        :env-binds
-        )
+;; Direction
+dwcB-backward-key .  .  .  .   "j"
+dwcB-forward-key .  .  .  .  . "l"
+dwcB-downward-key .  .  .  .   "k"
+dwcB-upward-key .  .  .  .  .  "i"
+;; Beginning/End
+dwcB-beginning-key .  .  .  .  . "u"
+dwcB-end-key .  .  .  .  .  .  . "o"
+;; Search
+dwcB-search-alpha-key .  .  .  . "p"
+dwcB-search-beta-key .  .  .  .  "y"
+;; Bigger/Smaller
+dwcB-bigger-key .  .  .  .  .  ">"
+dwcB-smaller-key .  .  .  .  . "<"
+;; Kill
+dwcB-kill-element-key .  .  .  . "d"
+dwcB-kill-big-key .  .  .  .  .  "a"
+dwcB-kill-or-save-key .  .  .  . "s"
+dwcB-remove-key .  .  .  .  .  . "b"
+;; Create
+dwcB-yank-key .  .  .  .  .  . "f"
+dwcB-insert-key .  .  .  .  .  "v"
+dwcB-note-key .  .  .  .  .  . "+"
+;; Transpose
+dwcB-transpose-key .  .  .  .  . "t"
+;; Undo/Redo
+dwcB-undo-key .  .  .  .  .  . "r"
+dwcB-redo-key .  .  .  .  .  . "t"
+;; Query
+dwcB-query-key .  .  .  .  .  "?"
+dwcB-description-key .  .  .  "/"
+;; Compile/Interpret
+dwcB-interpret-key .  .  .  .  ":"
+dwcB-compile-key .  .  .  .  . ";"
+#+end_src
+
+* Usage
+:key - not provided to map to dwcB global map. A minor mode or major
+       mode name to configure bindings for a minor or major mode. A
+       keymap name to define a dwcB keymap behind the scenes (useful
+       if you want to build map hierarchies using :parent).
+:base - A base map with which to compose the provided bindings
+:parent - A parent map from which the produces bindings should inherit
+:gen-binds - Bindings in the general namespace (i.e., not necessarily
+             under a prefix key)
+:env-binds - Bindings under the major prefix :wnd-binds - Bindings
+             under the window prefix"
+
+** Describing dwcB maps with :key
+Declare a dwcB map with :key. Build this map from prog-mode-map. Using :key this way allows the creation of base maps to be used by more specific dwcB binding configurations.
+#+begin_src emacs-lisp
+(dwcB-configure
+ :key 'prog-map
+ :base prog-mode-map
+ :env-binds: `(
+               (,dwcB-note-key . comment-dwim)
+               )
+ )
+#+end_src
+
+Declare a dwcB map with :key. Set it to derive from `prog-map' with :parent. :env-binds prefixes corresponding bindings with the major prefix key ("C-e" by default).
+#+begin_src emacs-lisp
+  (dwcB-configure
+   :key 'lisp-map
+   :parent 'prog-map
+   :env-binds`(;; Beg/End
+               (,dwcB-beginning-key . sp-beginning-of-sexp)
+               (,dwcB-end-key    .    sp-end-of-sexp)
+               ;; Upward/Downward
+               (,dwcB-downward-key       .       sp-down-sexp)
+               (,dwcB-upward-key        .        sp-up-sexp)
+               (,(concat "C-" dwcB-upward-key) . sp-backward-up-sexp)
+               ;; Forward/Backward
+               (,dwcB-forward-key             .             sp-forward-sexp)
+               (,dwcB-backward-key             .            sp-backward-sexp)
+               (,(concat "C-" dwcB-forward-key)      .      sp-forward-symbol)
+               (,(concat "C-" dwcB-backward-key)     .      sp-backward-symbol)
+               (,(concat "C-" (upcase dwcB-forward-key))  . sp-next-sexp)
+               (,(concat "C-" (upcase dwcB-backward-key)) . sp-previous-sexp)
+               ;; Slurp/Barf
+               ("e" . sp-forward-slurp-sexp)
+               ("r" . sp-forward-barf-sexp)
+               ("w" . sp-backward-slurp-sexp)
+               ("q" . sp-backward-barf-sexp)
+               ;; Transpose
+               (,dwcB-transpose-key . sp-transpose-sexp)
+               ;; Kill and Save
+               (,dwcB-kill-element-key            .             sp-kill-sexp)
+               (,(concat "C-" dwcB-kill-element-key)     .      sp-kill-hybrid-sexp)
+               (,(concat "C-" (upcase dwcB-kill-element-key)) . sp-backward-kill-sexp)
+               (,(concat "M-" dwcB-kill-element-key)      .     sp-copy-sexp)
+               )
+   )
+
+#+end_src
+** Associating modes and maps with :key
+Associate the (minor) mode specified by :key with a binding. Use :parent to inherit from newly created `lisp-map'. The following setting will be configured to run when `emacs-lisp-mode' is turned on.
+#+begin_src emacs-lisp
+  (dwcB-configure
+   :key 'emacs-lisp-mode
+   :parent 'lisp-map
+   :env-binds `(
+                (,dwcB-interpret-key . ielm)
+                )
+   )
 #+end_src
 
