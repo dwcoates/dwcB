@@ -1,0 +1,15 @@
+* dwcB
+
+Emacs minor mode for a (sort of) radical keybinding scheme
+
+* Usage
+
+#+begin_src emacs-lisp
+  (dwcB configure
+        :key 'emacs-lisp-mode
+        :parent 'lisp-mode
+        :gen-binds 
+        :env-binds
+        )
+#+end_src
+
