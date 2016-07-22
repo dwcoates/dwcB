@@ -108,6 +108,14 @@
               (,(concat "M-" dwcB-kill-or-save-key)  .  save-some-bueffer))
  )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;; PROGRAMMING ;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(dwcB-configure
+ :key 'prog-map
+ :base 'prog-mode-map
+ )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;; GENERAL LISP ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -116,6 +124,7 @@
 
 (dwcB-configure
  :key 'lisp-map
+ :parent 'prog-map
  :env-binds `(;; Beg/End
               (,dwcB-beginning-key . sp-beginning-of-sexp)
               (,dwcB-end-key    .    sp-end-of-sexp)
@@ -193,13 +202,6 @@
               ("+" . org-capture)
               )
  )
-
-;; (dwcB-configure
-;;  :key 'magit-mode
-;;  :get-binds `(
-;;               ;; Direction
-;;               ))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;; HELM MODE ;;;;;;;;;;;;;;;;;;;;;;;;;;;
