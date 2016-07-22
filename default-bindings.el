@@ -213,9 +213,11 @@
  :gen-binds `(
               ;; Direction
               (,(concat "C-" dwcB-downward-key) . helm-next-line)
-              (,(concat "C-" dwcB-upward-key) . helm-previous-line)
-              (,(concat "C-" dwcB-forward-key) . helm-next-page)
-              (,(concat "C-" dwcB-backward-key) . helm-previous-page)
+              (,(concat "H-" dwcB-upward-key) . helm-previous-line)
+              (,(concat "C-" dwcB-forward-key) . helm-next-source)
+              (,(concat "C-" dwcB-backward-key) . helm-previous-source)
+              (,(concat "M-" dwcB-downward-key) . helm-next-page)
+              (,(concat "M-" dwcB-upward-key) . helm-previous-previous)
               ;; Search
               )
  )
