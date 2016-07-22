@@ -51,13 +51,19 @@
               (,(concat "M-" dwcB-kill-big-key)   .   kill-sentence)
               (,(concat "M-" dwcB-kill-or-save-key) . kill-ring-save)
               ("C-z" . zap-to-char)
-              ("C-v" . delete-horizontal-space)
-              ("M-v" . delete-indentation)
+              (,dwcB-remove-key . delete-horizontal-space)
+              (,(concat "C-" dwcB-remove-key) . delete-indentation)
               ;; Transpose
               (,(concat "C-" dwcB-transpose-key) . transpose-chars)
               (,(concat "M-" dwcB-transpose-key) . transpose-words)
               ;; Yank
-              (,(concat "C-" dwcB-yank-key) . yank))
+              (,(concat "C-" dwcB-yank-key) . yank)
+              ;; Note
+              (,dwcB-note-key . org-capture)
+              ;; Big/Small
+              ; ((concat "C-c " ) . fill-region)
+              )
+
  :wnd-binds `(
    ;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;;;; NAVIGATION ;;;;;;
@@ -115,6 +121,9 @@
 (dwcB-configure
  :key 'prog-map
  :base prog-mode-map
+ :env-binds: `(
+               (,dwcB-note-key . comment-dwim)
+               )
  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -227,7 +236,6 @@
               (,(concat "C-" dwcB-smaller-key)  .  org-narrow-to-block)
               ;; Search
               ;; Misc
-              ("+" . org-capture)
               )
  )
 

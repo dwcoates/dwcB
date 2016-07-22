@@ -25,9 +25,11 @@
 (defconst dwcB-kill-element-key "d")
 (defconst dwcB-kill-big-key "a")
 (defconst dwcB-kill-or-save-key "s")
+(defconst dwcB-remove-key)
 ;; Create
 (defconst dwcB-yank-key "f")
 (defconst dwcB-insert-key "v")
+(defconst dwcB-note-key "+")
 ;; Transpose
 (defconst dwcB-transpose-key "t")
 ;; Undo/Redo
