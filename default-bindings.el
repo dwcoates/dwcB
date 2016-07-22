@@ -114,7 +114,7 @@
 
 (dwcB-configure
  :key 'prog-map
- :base 'prog-mode-map
+ :base prog-mode-map
  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -173,6 +173,34 @@
  :parent 'lisp-map
  )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;; PYTHON ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(dwcB-configure
+ :key 'python-mode
+ :parent 'prog-map
+ :env-binds `(
+              ;; Search/Query
+              (,dwcB-query-key     .     elpy-doc)
+              (,dwcB-description-key  .  elpy-goto-definition)
+              (,dwcB-search-alpha-key .  elpy-rgrep-symbol)
+              ;; Direction
+              (,dwcB-forward-key         .         elpy-nav-forward-indent)
+              (,(concat "C-" dwcB-forward-key)  .  python-nav-forward-sexp)
+              (,(concat "M-" dwcB-forward-key)  .  elpy-nav-forward-block)
+              ;; Beg/End
+              (,dwcB-beginning-key        .        python-nav-beginning-of-statement)
+              (,(concat "C-" dwcB-end-key)    .    python-nav-beginning-of-block)
+              (,dwcB-end-key           .           python-nav-end-of-statement)
+              (,(concat "C-" dwcB-end-key)    .    python-nav-end-of-block)
+              ;; Interpreter/Compiler
+              (,dwcB-interpret-key         .         elpy-shell-switch-to-shell)
+              (,(concat "C-" dwcB-interpret-key)  .  elpy-shell-send-region-or-buffer)
+              (,(concat "M-" dwcB-interpret-key)  .  pyvenv-restart-python)
+              )
+ )
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;; ORG MODE ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -181,22 +209,22 @@
  :key 'org-mode
  :gen-binds `(
               ;; Kill
-              (,(concat "C-" dwcB-kill-big-key) . org-kill-line)
+              (,(concat "C-" dwcB-kill-big-key)  . org-kill-line)
               ;; Beg/End
               (,(concat "C-" dwcB-beginning-key) . org-beginning-of-line)
-              (,(concat "C-" dwcB-end-key) . org-end-of-line)
+              (,(concat "C-" dwcB-end-key)    .    org-end-of-line)
               )
  :env-binds `(;; Direction
-              (,(concat "C-" dwcB-forward-key) . org-forward-heading-same-level)
-              (,(concat "C-" dwcB-backward-key) . org-previous-heading-same-level)
-              (,(concat "C-" dwcB-upward-key) . outline-next-visible-heading)
-              (,(concat "C-" dwcB-downward-key) . outling-previous-visible-heading)
+              (,(concat "C-" dwcB-forward-key)   .  org-forward-heading-same-level)
+              (,(concat "C-" dwcB-backward-key)  .  org-previous-heading-same-level)
+              (,(concat "C-" dwcB-upward-key)   .   outline-next-visible-heading)
+              (,(concat "C-" dwcB-downward-key)  .  outling-previous-visible-heading)
               ;; Beg/Eng
               ;; Bigger/Smaller
-              (,dwcB-bigger-key . widen)
-              (,dwcB-smaller-key . org-narrow-to-element)
-              (,(concat "C-" dwcB-smaller-key) . org-narrow-to-subtree)
-              (,(concat "C-" dwcB-smaller-key) . org-narrow-to-block)
+              (,dwcB-bigger-key         .          widen)
+              (,dwcB-smaller-key         .         org-narrow-to-element)
+              (,(concat "C-" dwcB-smaller-key)  .  org-narrow-to-subtree)
+              (,(concat "C-" dwcB-smaller-key)  .  org-narrow-to-block)
               ;; Search
               ;; Misc
               ("+" . org-capture)
@@ -212,13 +240,12 @@
  :parent 'helm-map
  :gen-binds `(
               ;; Direction
-              (,(concat "C-" dwcB-downward-key) . helm-next-line)
-              (,(concat "H-" dwcB-upward-key) . helm-previous-line)
-              (,(concat "C-" dwcB-forward-key) . helm-next-source)
-              (,(concat "C-" dwcB-backward-key) . helm-previous-source)
-              (,(concat "M-" dwcB-downward-key) . helm-next-page)
-              (,(concat "M-" dwcB-upward-key) . helm-previous-previous)
-              ;; Search
+              (,(concat "C-" dwcB-downward-key)  .  helm-next-line)
+              (,(concat "H-" dwcB-upward-key)   .   helm-previous-line)
+              (,(concat "C-" dwcB-forward-key)   .  helm-next-source)
+              (,(concat "C-" dwcB-backward-key)  .  helm-previous-source)
+              (,(concat "M-" dwcB-downward-key)  .  helm-next-page)
+              (,(concat "M-" dwcB-upward-key)   .   helm-previous-page)
               )
  )
 
