@@ -41,17 +41,22 @@ dwcB-interpret-key .  .  .  .  ":"
 dwcB-compile-key .  .  .  .  . ";"
 #+end_src
 
-* Usage
-:key - not provided to map to dwcB global map. A minor mode or major
-       mode name to configure bindings for a minor or major mode. A
-       keymap name to define a dwcB keymap behind the scenes (useful
-       if you want to build map hierarchies using :parent).
-:base - A base map with which to compose the provided bindings
-:parent - A parent map from which the produces bindings should inherit
-:gen-binds - Bindings in the general namespace (i.e., not necessarily
-             under a prefix key)
-:env-binds - Bindings under the major prefix :wnd-binds - Bindings
-             under the window prefix"
+* Usage (define dwcB maps with dwcB-configure)
+** dwcB-configure
++ :key
+       - A minor mode or major mode name to which the produced dwcB map will associate. Alternatively, a
+         name for a new dwcB map (useful if you want to build  map hierarchies using :parent). 
+         Omit :key to configure dwcB's global map. 
++ :base 
+       - A base map on which to build the produced dwcB map.
++ :parent 
+       - A parent map from which the produced dwcB map should inherit.
++ :gen-binds 
+       - Bindings in the general namespace (i.e., not necessarily under a prefix key).
++ :env-binds 
+       - Bindings under the major prefix. 
++ :wnd-binds 
+       - Bindings under the window prefix.
 
 ** Describing dwcB maps with :key
 Declare a dwcB map with :key. Build this map from prog-mode-map. Using :key this way allows the creation of base maps to be used by more specific dwcB binding configurations.
