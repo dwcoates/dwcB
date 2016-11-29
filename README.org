@@ -1,6 +1,7 @@
 * dwcB
 
-Emacs minor mode for a (sort of) radical keybinding scheme
+Emacs minor mode for a (sort of) radical keybinding scheme.
+Currently has default support for Lisp, Python, Org and Helm.
 
 * Key Generics
 Generics for categorizing most common commands
