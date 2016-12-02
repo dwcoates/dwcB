@@ -17,14 +17,17 @@
    ;;;;;; NAVIGATION ;;;;;;
    ;;;;;;;;;;;;;;;;;;;;;;;;
               ;; Direction
+                ; small direction
               (,(concat "C-" dwcB-backward-key)  .  backward-char)
               (,(concat "C-" dwcB-forward-key)  .   forward-char)
               (,(concat "H-" dwcB-upward-key)   .   previous-line)
               (,(concat "C-" dwcB-downward-key)  .  next-line)
+                ; large direction
               (,(concat "M-" dwcB-backward-key)  .  backward-word)
               (,(concat "M-" dwcB-forward-key)   .  forward-word)
               (,(concat "M-" dwcB-downward-key)  .  forward-paragraph)
               (,(concat "M-" dwcB-upward-key)   .   backward-paragraph)
+                ; scroll
               (,(concat "C-S-" dwcB-forward-key) .  scroll-left)
               (,(concat "C-S-" dwcB-backward-key) . scroll-right)
               (,(concat "C-S-" dwcB-upward-key)  .  scroll-down-command)
