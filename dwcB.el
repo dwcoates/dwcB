@@ -21,6 +21,9 @@
 ;; Bigger/Smaller
 (defconst dwcB-bigger-key ">")
 (defconst dwcB-smaller-key "<")
+;; Add/Subtract
+(defconst dwcB-shift-left-key "n")
+(defconst dwcB-shift-right-key "m")
 ;; Kill
 (defconst dwcB-kill-element-key "d")
 (defconst dwcB-kill-big-key "a")

@@ -4,6 +4,12 @@
 ;;;;;;;;;;;;;;;;;;;;;; DWCB  GLOBAL ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; to add
+;
+;(C-c . hide-entry)
+;(C-t . hide-body)
+;(C-l . hide-leaves)
+
 (dwcB-configure
  :base global-map
  :gen-binds `(
