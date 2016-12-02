@@ -28,11 +28,11 @@
 (defconst dwcB-kill-element-key "d")
 (defconst dwcB-kill-big-key "a")
 (defconst dwcB-kill-or-save-key "s")
-(defconst dwcB-remove-key)
+(defconst dwcB-remove-key "b")
 ;; Create
-(defconst dwcB-yank-key "f")
+b(defconst dwcB-yank-key "f")
 (defconst dwcB-insert-key "v")
-(defconst dwcB-note-key "+")
+;(defconst dwcB-note-key "+")
 ;; Transpose
 (defconst dwcB-transpose-key "t")
 ;; Undo/Redo
@@ -42,8 +42,8 @@
 (defconst dwcB-query-key "?")
 (defconst dwcB-description-key "/")
 ;; Compile/Interpret
-(defconst dwcB-interpret-key ":")
-(defconst dwcB-compile-key ";")
+;(defconst dwcB-interpret-key ":")  ;; bad
+;(defconst dwcB-compile-key ";")    ;; bad
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;; MAPS/PREFIXES ;;;;;;;;
