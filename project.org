@@ -1,0 +1,25 @@
+* Maps to worry about
+** major maps
+*** set
+(current-local-map) to get local map to cache
+q*** revert
+(set-local-map) to set the local map to use
+** minor maps
+*** set
+add map to (minor-mode-map-alist)         
+*** unset
+if minor-mode already has a map. Save it to minor-mode cache.
+ append minor-mode cache to minor-mode-map-alist
+(current-minor-mode-maps)
+** DONE global map
+   Easy. Can be cached
+* should cache keymaps if they will get lost
+
+* Organizing saved maps
+
+[
+[KEYMAPS]
+(GLOBAL . dwcB-keymap),
+(MINOR . dwcB-alist)
+(MAJOR . dwcB-alist)
+]
