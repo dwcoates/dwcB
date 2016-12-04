@@ -169,19 +169,25 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   "Accepts a binding configuration and converts it into a key/command alist"
 
   ;; needs to handle the H-i problem (peculiarity with emacs key binding architecture leaves C-i broken)
-  (apply 'append
-   (mapcar (apply-partially 'apply
-                            (lambda (modifier bindings)
-                              (mapcar (lambda (bind) (cons (concat modifier (car bind)) (cdr bind)))
-                                      bindings)))
-           (remove-if-not #'cdr
-                          `(("C-"  ,(plist-get binding-config 'C-modifier))
-                            ("M-"  ,(plist-get binding-config 'M-modifier))
-                            ("C-S-"  ,(plist-get binding-config 'C-S-modifier))
-                            ("M-S-"  ,(plist-get binding-config 'M-S-modifier))
-                            ("C-M-"  ,(plist-get binding-config 'C-M-modifier))
-                            ("C-M-S-"  ,(plist-get binding-config 'C-M-S-modifier)))))
-   )
+  (let ((modifiers '(("" no-modifier)
+                     ("C-" C-modifier)
+                     ("M-" M-modifier)
+                     ("C-S-" C-S-modifier)
+                     ("M-S-" M-S-modifier)
+                     ("C-M-" C-M-modifier)
+                     ("C-M-S-" C-M-S-modifier))))
+    (apply 'append
+           (mapcar (apply-partially 'apply
+                                    (lambda (modifier bindings)
+                                      (mapcar (lambda (bind) (cons (concat modifier (car bind))
+                                                                   (cdr bind)))
+                                              bindings)))
+                   (remove-if-not #'cdr (mapcar (lambda (modifier)
+                                                  `(,(car modifier)
+                                                    ,(plist-get binding-config (cadr modifier))))
+                                                modifiers)
+                                                 )))
+    )
   )
 
 
@@ -201,15 +207,18 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   (let* ((key (plist-get args :key))
          (base-map (plist-get args :base))
          (parent-map (plist-get args :parent))
-         (gen-binds (plist-get args :gen-binds))
-         (env-binds (plist-get args :env-binds))
-         (wnd-binds (plist-get args :wnd-binds)))
+         (clean-bind-conf (lambda (config)
+                            "Read a binding config (normal and C-x subprefix) and return results"
+                            (apply 'append
+                                   `(,(read-binds (cdr config)) ,(read-binds (cdr config))))))
+         (gen-binds (funcall clean-bind-conf (plist-get args :gen-binds)))
+         (env-binds (funcall clean-bind-conf (plist-get args :env-binds)))
+         (wnd-binds (funcall clean-bind-conf (plist-get args :wnd-binds))))
     (unless (symbolp key)
       (error ":key must be a symbol"))
     (unless (symbolp parent-map)
       (error ":key must be a symbol"))
-    (unless (or (or gen-binds env-binds wnd-binds)
-                (and key (or parent-map base-map)))
+    (unless (or (or gen-binds env-binds wnd-binds) (and key (or parent-map base-map)))
       (error
        "Must provide general (:gen-binds), environment (:env-binds) or
        window (:wnd-binds) bindings."))
