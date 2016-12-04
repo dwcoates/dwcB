@@ -28,7 +28,7 @@
 (defconst dwcB-kill-element-key "d")
 (defconst dwcB-kill-big-key "a")
 (defconst dwcB-kill-or-save-key "s")
-(defconst dwcB-remove-key)
+(defconst dwcB-remove-key "z")
 ;; Create
 (defconst dwcB-yank-key "f")
 (defconst dwcB-insert-key "v")
@@ -176,6 +176,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
              under a prefix key)
 :env-binds - Bindings under the major prefix :wnd-binds - Bindings
              under the window prefix"
+
   (let* ((key (plist-get args :key))
          (base-map (plist-get args :base))
          (parent-map (plist-get args :parent))
@@ -191,29 +192,43 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
       (error
        "Must provide general (:gen-binds), environment (:env-binds) or
        window (:wnd-binds) bindings."))
-    (let ((dwcB-map (make-sparse-keymap))
-          (build-map (lambda (map binding)
-                       (define-key map (kbd (car binding)) (cdr binding)))))
-      (when gen-binds
-        (mapc (apply-partially build-map dwcB-map) gen-binds)
-        )
-      (when wnd-binds
-        (let ((wnd-map (make-sparse-keymap)))
-          (mapc (apply-partially build-map wnd-map) wnd-binds)
-          (define-key dwcB-map (kbd dwcB-inter-buffer-prefix) wnd-map)
-          )
-        )
-      (when env-binds
-        (let ((env-map (make-sparse-keymap)))
-          (mapc (apply-partially build-map env-map) env-binds)
-          (define-key dwcB-map (kbd dwcB-major-prefix) env-map)
-          )
-        )
+
+
+    (let* ((dwcB-map (make-sparse-keymap))
+           (build-map (lambda (BINDS)
+                        "Create a map from binding configuration BINDS and return it"
+                        (let ((map (make-sparse-keymap)))
+                          (mapc (lambda (binding)
+                                  (define-key map (kbd (car binding)) (cdr binding)))
+                                BINDS
+                                )
+                          map
+                          ))))
+
+      ;; Add major, window, and general binds into dwcB-map
+      (mapc (apply-partially 'apply (lambda (BINDS PREFIX)
+                                      "Add BINDS to dwcB-map. If PREFIX non-nil, add under PREFIX"
+                                      (when BINDS
+                                        (let* ((no-prefix-binds (car BINDS))
+                                               (ctrl-x-binds (cadr BINDS))
+                                               (map (funcall build-map no-prefix-binds)))
+                                          (define-key map (kbd "C-x") (funcall build-map ctrl-x-binds))
+                                          (if PREFIX
+                                              (define-key dwcB-map (kbd PREFIX) map)
+                                            (setq dwcB-map (make-composed-keymap dwcB-map map)))
+                                          ))))
+            `((,gen-binds  nil)
+              (,env-binds  ,dwcB-major-prefix)
+              (,wnd-binds  ,dwcB-inter-buffer-prefix)))
+
+      ;; If a base map, add those binds to dwcB-map
       (when base-map
         (unless (keymapp base-map)
           (error ":base must be a keymap"))
         (setq dwcB-map (make-composed-keymap dwcB-map base-map))
         )
+
+      ;; Inherit dwcB-map from parent-map if it exists
       (when parent-map
         (if (and (boundp parent-map) (keymapp (symbol-value parent-map)))
             (set-keymap-parent dwcB-map (symbol-value parent-map))
@@ -223,17 +238,19 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
               (error "parent-map must be a keymap or a known dwcB key")))
           ))
 
+      ;; Decide when this dwcB-map goes into effect (globally, during a certain mode, etc)
       (if key
-          (let ((mode-map (cons key dwcB-map)))
+          (let ((mode-map-assoc (cons key dwcB-map)))
             (if (member key minor-mode-list)
-                (dwcB--save mode-map 'dwcB--minor-alist)
-              (dwcB--save mode-map 'dwcB--primary-alist)))
+                (dwcB--save mode-map-assoc 'dwcB--minor-alist)
+              (dwcB--save mode-map-assoc 'dwcB--primary-alist)))
         (setq dwcB--global-map (make-composed-keymap dwcB-map dwcB--global-map))
-        ))
-  ))
+        )
+      ))
+  )
 
 
-(require 'default-bindings)
+;(require 'default-bindings)
 
 (provide 'dwcB)
 

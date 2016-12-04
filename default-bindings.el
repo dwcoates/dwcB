@@ -16,58 +16,59 @@
    ;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;;;; NAVIGATION ;;;;;;
    ;;;;;;;;;;;;;;;;;;;;;;;;
-              ;; Direction
-              (,(concat "C-" dwcB-backward-key)  .  backward-char)
-              (,(concat "C-" dwcB-forward-key)  .   forward-char)
-              (,(concat "H-" dwcB-upward-key)   .   previous-line)
-              (,(concat "C-" dwcB-downward-key)  .  next-line)
-              (,(concat "M-" dwcB-backward-key)  .  backward-word)
-              (,(concat "M-" dwcB-forward-key)   .  forward-word)
-              (,(concat "M-" dwcB-downward-key)  .  forward-paragraph)
-              (,(concat "M-" dwcB-upward-key)   .   backward-paragraph)
-              (,(concat "C-S-" dwcB-forward-key) .  scroll-left)
-              (,(concat "C-S-" dwcB-backward-key) . scroll-right)
-              (,(concat "C-S-" dwcB-upward-key)  .  scroll-down-command)
-              (,(concat "C-S-" dwcB-downward-key) . scroll-up-command)
-              (,(concat "C-M-" dwcB-upward-key)  .  scroll-other-window-down)
-              (,(concat "C-M-" dwcB-downward-key) . scroll-other-window)
-              ;; Beginning/End
-              (,(concat "C-" dwcB-beginning-key)  .  beginning-of-line)
-              (,(concat "C-" dwcB-end-key)     .     end-of-line)
-              (,(concat "M-" dwcB-end-key)     .     forward-to-indentation)
-              (,(concat "M-" dwcB-beginning-key)  .  backward-to-indentation)
-              (,(concat "C-M-" dwcB-beginning-key) . beginning-of-buffer)
-              (,(concat "C-M-" dwcB-end-key)    .    end-of-buffer)
-              ;; Bigger/Smaller
-              (,(concat "C-" dwcB-smaller-key) . narrow-to-region)
-              (,(concat "M-" dwcB-smaller-key) . narrow-to-page)
-              (,(concat "C-" dwcB-bigger-key) .  widen)
-              ;; Search
-              (,(concat "C-" dwcB-search-alpha-key) . isearch-forward)
-              (,(concat "C-" dwcB-search-beta-key) .  isearch-backward)
-              (,(concat "C-S-M-" dwcB-upward-key)  .  upcase-region)
-              (,(concat "C-S-M-" dwcB-downward-key) . downcase-region)
-              (,(concat "M-" dwcB-search-alpha-key) . helm-swoop)
+              `( ;; Direction
+                (,(concat "C-" dwcB-backward-key)  .  backward-char)
+                (,(concat "C-" dwcB-forward-key)  .   forward-char)
+                (,(concat "H-" dwcB-upward-key)   .   previous-line)
+                (,(concat "C-" dwcB-downward-key)  .  next-line)
+                (,(concat "M-" dwcB-backward-key)  .  backward-word)
+                (,(concat "M-" dwcB-forward-key)   .  forward-word)
+                (,(concat "M-" dwcB-downward-key)  .  forward-paragraph)
+                (,(concat "M-" dwcB-upward-key)   .   backward-paragraph)
+                (,(concat "C-S-" dwcB-forward-key) .  scroll-left)
+                (,(concat "C-S-" dwcB-backward-key) . scroll-right)
+                (,(concat "C-S-" dwcB-upward-key)  .  scroll-down-command)
+                (,(concat "C-S-" dwcB-downward-key) . scroll-up-command)
+                (,(concat "C-M-" dwcB-upward-key)  .  scroll-other-window-down)
+                (,(concat "C-M-" dwcB-downward-key) . scroll-other-window)
+                 ;; Beginning/End
+                (,(concat "C-" dwcB-beginning-key)  .  beginning-of-line)
+                (,(concat "C-" dwcB-end-key)     .     end-of-line)
+                (,(concat "M-" dwcB-end-key)     .     forward-to-indentation)
+                (,(concat "M-" dwcB-beginning-key)  .  backward-to-indentation)
+                (,(concat "C-M-" dwcB-beginning-key) . beginning-of-buffer)
+                (,(concat "C-M-" dwcB-end-key)    .    end-of-buffer)
+                 ;; Bigger/Smaller
+                (,(concat "C-" dwcB-smaller-key) . narrow-to-region)
+                (,(concat "M-" dwcB-smaller-key) . narrow-to-page)
+                (,(concat "C-" dwcB-bigger-key) .  widen)
+                 ;; Search
+                (,(concat "C-" dwcB-search-alpha-key) . isearch-forward)
+                (,(concat "C-" dwcB-search-beta-key) .  isearch-backward)
+                (,(concat "C-S-M-" dwcB-upward-key)  .  upcase-region)
+                (,(concat "C-S-M-" dwcB-downward-key) . downcase-region)
+                (,(concat "M-" dwcB-search-alpha-key) . helm-swoop)
    ;;;;;;;;;;;;;;;;;;;;;
    ;;;;;; EDITING ;;;;;;
    ;;;;;;;;;;;;;;;;;;;;;
-              ;; Kill
-              (,(concat "C-" dwcB-kill-big-key)   .   kill-line)
-              (,(concat "C-" dwcB-kill-or-save-key) . kill-region)
-              (,(concat "M-" dwcB-kill-big-key)   .   kill-sentence)
-              (,(concat "M-" dwcB-kill-or-save-key) . kill-ring-save)
-              ("C-z" . zap-to-char)
-              (,dwcB-remove-key . delete-horizontal-space)
-              (,(concat "C-" dwcB-remove-key) . delete-indentation)
-              ;; Transpose
-              (,(concat "C-" dwcB-transpose-key) . transpose-chars)
-              (,(concat "M-" dwcB-transpose-key) . transpose-words)
-              ;; Yank
-              (,(concat "C-" dwcB-yank-key) . yank)
-              ;; Note
-              (,dwcB-note-key . org-capture)
-              ;; Big/Small
+                ;; Kill
+                (,(concat "C-" dwcB-kill-big-key)   .   kill-line)
+                (,(concat "C-" dwcB-kill-or-save-key) . kill-region)
+                (,(concat "M-" dwcB-kill-big-key)   .   kill-sentence)
+                (,(concat "M-" dwcB-kill-or-save-key) . kill-ring-save)
+                ("C-z" . zap-to-char)
+                (,dwcB-remove-key . delete-horizontal-space)
+                (,(concat "C-" dwcB-remove-key) . delete-indentation)
+                ;; Transpose
+                (,(concat "C-" dwcB-transpose-key) . transpose-chars)
+                (,(concat "M-" dwcB-transpose-key) . transpose-words)
+                ;; Yank
+                (,(concat "C-" dwcB-yank-key) . yank)
+                ;; Note
+                (,dwcB-note-key . org-capture)
+                ;; Big/Small
               ; ((concat "C-c " ) . fill-region)
+                )
               )
 
  :wnd-binds `(
