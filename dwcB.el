@@ -211,8 +211,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
          (parent-map (plist-get args :parent))
          (clean-bind-conf (lambda (config)
                             "Read a binding config (normal and C-x subprefix) and return results"
-                            (apply 'append
-                                   `(,(read-binds (cdr config)) ,(read-binds (cdr config))))))
+                            `(,(read-binds (cdr config)) ,(read-binds (cdr config)))))
          (gen-binds (funcall clean-bind-conf (plist-get args :gen-binds)))
          (env-binds (funcall clean-bind-conf (plist-get args :env-binds)))
          (wnd-binds (funcall clean-bind-conf (plist-get args :wnd-binds))))
