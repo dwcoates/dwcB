@@ -179,10 +179,12 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
     (apply 'append
            (mapcar (apply-partially 'apply
                                     (lambda (modifier bindings)
+                                      "Add a modifier to all in a binding-list"
                                       (mapcar (lambda (bind) (cons (concat modifier (car bind))
                                                                    (cdr bind)))
                                               bindings)))
                    (remove-if-not #'cdr (mapcar (lambda (modifier)
+                                                  "Produce a modifier/binding-list association"
                                                   `(,(car modifier)
                                                     ,(plist-get binding-config (cadr modifier))))
                                                 modifiers)
