@@ -1,5 +1,7 @@
 ;;; Code:
 
+(require 'cl)
+
 ;; temp
 (add-to-list 'load-path "~/workspace/dwcB")
 
@@ -163,19 +165,38 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
     )
   )
 
+(defun read-binds (binding-config)
+  "Accepts a binding configuration and converts it into a key/command alist"
+
+  ;; needs to handle the H-i problem (peculiarity with emacs key binding architecture leaves C-i broken)
+  (apply 'append
+   (mapcar (apply-partially 'apply
+                            (lambda (modifier bindings)
+                              (mapcar (lambda (bind) (cons (concat modifier (car bind)) (cdr bind)))
+                                      bindings)))
+           (remove-if-not #'cdr
+                          `(("C-"  ,(plist-get binding-config 'C-modifier))
+                            ("M-"  ,(plist-get binding-config 'M-modifier))
+                            ("C-S-"  ,(plist-get binding-config 'C-S-modifier))
+                            ("M-S-"  ,(plist-get binding-config 'M-S-modifier))
+                            ("C-M-"  ,(plist-get binding-config 'C-M-modifier))
+                            ("C-M-S-"  ,(plist-get binding-config 'C-M-S-modifier)))))
+   )
+  )
+
 
 (defun dwcB-configure (&rest args)
   "Configures dwcB binding.
-:key - not provided to map to dwcB global map. A minor mode or major
-       mode name to configure bindings for a minor or major mode. A
-       keymap name to define a dwcB keymap behind the scenes (useful
+:key - A minor mode or major mode name to configure bindings to.
+       A keymap name to which to correlate a dwcB keymap. (useful
        if you want to build map hierarchies using :parent).
-:base - A base map with which to compose the provided bindings
-:parent - A parent map from which the produces bindings should inherit
+       Ommit to bind globally.
+:base - A base map with which to compose the provided bindings.
+:parent - A parent map from which the produces bindings should inherit.
 :gen-binds - Bindings in the general namespace (i.e., not necessarily
              under a prefix key)
-:env-binds - Bindings under the major prefix :wnd-binds - Bindings
-             under the window prefix"
+:env-binds - Bindings under the major prefix
+:wnd-binds - Bindings under the window prefix"
 
   (let* ((key (plist-get args :key))
          (base-map (plist-get args :base))
