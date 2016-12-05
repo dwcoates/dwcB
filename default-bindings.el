@@ -4,11 +4,19 @@
 ;;;;;;;;;;;;;;;;;;;;;; DWCB  GLOBAL ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;; to add ;;;;
+;;;; to add to global ;;;;
 ;
 ;(C-c . hide-entry)
 ;(C-t . hide-body)
 ;(C-l . hide-leaves)
+;; (C-u . outline-up-heading)
+;; (C-v . outline-move-subtree-down)
+;; (C-^ . outline-move-subtree-up)
+;; (dwcB-present-key  .  show-branches)
+;; (dwcB-upward-key   .   outline-next-visible-heading)
+;; (dwcB-downward-key  .  outline-previous-visible-heading)
+;; (dwcB-beginning-key     .     show-all)
+;; (dwcB-end-key        .        show-entry)
 
 (dwcB-configure
  :base global-map
@@ -245,40 +253,63 @@
                              (dwcB-shift-right-key . org-table-rotate-recalc-marks)
                              (dwcB-query-key    .    org-table-field-info)))
               )
- :env-binds `(
+ :env-binds `(;; Basic navigation and editing
               (no-modifier  ((dwcB-forward-key      .      org-forward-element)
                              (dwcB-backward-key      .     org-backward-element)
-                             (dwcB-bigger-key      .       widen)
+                             ((upcase dwcB-bigger-key)  .  widen)
                              (dwcB-smaller-key      .      org-narrow-to-element)
-                             (dwcB-beginning-key     .     show-all)
-                             (dwcB-end-key        .        show-entry)
                              (dwcB-kill-big-key     .      org-kill-note-or-show-branches)
                              (dwcB-kill-small-key    .     org-copy)
+                             (dwcB-transpose       .       org-emphasize)
+                             (dwcB-search-alpha-key   .    org-goto)
+                             (dwcB-search-beta-key    .    org-goto-calendar)
                              ((upcase dwcB-kill-big-key) . org-copy-visible)
                              (dwcB-note-key        .       org-add-note)
                              ((upcase dwcB-note-key)   .   org-toggle-comment)
                              (dwcB-insert-key       .      org-ctrl-c-ret)
-                             (@ . org-mark-subtree))
-               C-modifier   ((dwcB-forward-key   .  org-forward-heading-same-level)
+                             ((upcase dwcB-insert-key)  .  org-sparse-tree)
+                             (dwcB-yank-key       .        org-refile)
+                             (dwcB-mark-key       .        org-mark-subtree)
+                             (dwcB-evaluate-key      .     org-ctrl-c-ctrl-c)
+                             (dwcB-enter-key       .       org-open-at-point)
+                             (dwcB-edit-key        .       org-tree-to-indirect-buffer)
+                             (dwcB-present-key      .      org-toggle-inline-images)
+                             (dwcB-sort-key        .       org-sort)
+                             (dwcB-bigger-key       .      org-reveal)
+                             ((upcase dwcB-present-key) .  org-preview-latex-fragment))
+               ;; Navigate headings && General
+               C-modifier   ((dwcB-transpose-key .  org-list-make-subtree)
+                             (dwcB-forward-key   .  org-forward-heading-same-level)
                              (dwcB-backward-key  .  org-previous-heading-same-level)
-                             (dwcB-upward-key   .   outline-next-visible-heading)
-                             (dwcB-downward-key  .  outling-previous-visible-heading)
                              (dwcB-smaller-key  .   org-narrow-to-subtree)
                              (dwcB-note-key     .   org-footnote-action)
-                             (dwcB-enter-key    .   org-open-at-point))
+                             (dwcB-enter-key    .   org-meta-return))
+               ;; Navigate headings finely && Edit TODOs
                M-modifier   ((dwcB-upward-key    .   org-previous-block)
                              (dwcB-downward-key   .  org-next-block)
                              (dwcB-forward-key   .   org-forward-sentence)
                              (dwcB-backward-key   .  org-backward-sentence)
-                             (dwcB-smaller-key   .   org-narrow-to-block))
-               C-M-modifier ((dwcB-shift-right-key . org-shiftright)
+                             (dwcB-smaller-key   .   org-narrow-to-block)
+                             (dwcB-enter-key    .    org-insert-todo-heading)
+                             (dwcB-transpose-key  .  org-todo))
+               ;; Property editing (context sensitive)
+               C-S-modifier ((dwcB-shift-right-key . org-shiftright)
                              (dwcB-shift-left-key  . org-shiftleft)
                              (dwcB-smaller-key   .   org-shiftdown)
                              (dwcB-bigger-key    .   org-shiftup))
-               M-S-modifier ((dwcB-rightward-key . org-shiftmetaright)
+               ;; Heading/Table editing (context sensitive)
+               M-S-modifier ((dwcB-transpose-key . org-ctrl-c-star)
+                             (dwcB-rightward-key . org-shiftmetaright)
                              (dwcB-leftward-key  . org-shiftmetaleft)
                              (dwcB-downward-key  . org-shiftmetadown)
-                             (dwcB-upward-key   .  org-shiftmetaup)))
+                             (dwcB-upward-key   .  org-shiftmetaup))
+               ;; Property editing && Misc
+               C-M-modifier ((dwcB-backward-key  . org-previous-link)
+                             (dwcB-forward-key  .  org-next-link)
+                             (dwcB-yank-key    .   org-insert-link)
+                             (dwcB-transpose-key . org-inc-effort)
+                             (dwcB-insert-key   .  org-set-effort)
+                             (dwcB-transpose-key . org-toggle-checkbox)))
               ;; junk
               `(no-modifier ((x . org-babel-do-key-sequence-in-edit-buffer)
                              (C-x . org-babel-do-key-sequence-in-edit-buffer)
@@ -322,6 +353,25 @@
                              (C-p . org-babel-previous-src-block)
                              (p . org-babel-previous-src-block)))
  )
+
+
+ ;; goes in parents map
+ ;; (remap keymap
+ ;;        (delete-backward-char . org-delete-backward-char)
+ ;;        (delete-char . org-delete-char)
+ ;;        (self-insert-command . org-self-insert-command)
+ ;;        (transpose-words . org-transpose-words)
+ ;;        (backward-paragraph . org-backward-paragraph)
+ ;;        (forward-paragraph . org-forward-paragraph)
+ ;;        (open-line . org-open-line)
+ ;;        (outline-insert-heading . org-ctrl-c-ret)
+ ;;        (outline-demote . org-demote-subtree)
+ ;;        (outline-promote . org-promote-subtree)
+ ;;        (show-branches . org-kill-note-or-show-branches)
+ ;;        (outline-backward-same-level . org-backward-heading-same-level)
+ ;;        (outline-forward-same-level . org-forward-heading-same-level)
+ ;;        (show-subtree . org-show-subtree)
+ ;;        (outline-mark-subtree . org-mark-subtree))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;; HELM MODE ;;;;;;;;;;;;;;;;;;;;;;;;;;;
