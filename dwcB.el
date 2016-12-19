@@ -96,7 +96,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
 
 (defun dwcB--setup ()
   (progn
-    (keyboard-translate ?\C-i ?\H-i)
+    (keyboard-translate ?\C-i ?\H-i) ; this is needed because emacs wont let you bind C-i naturally
     (dwcB--set-global-map)
     (add-hook 'after-change-major-mode-hook 'dwcB--major-mode-update)
     (dwcB--major-mode-update)
@@ -116,14 +116,13 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
 
 (defun dwcB--set-global-map ()
   "Set the current global map to dwcB global map."
-  (if (eq (current-global-map) global-map)
-      (use-global-map dwcB--global-map))
+  (when (eq (current-global-map) global-map)
+    (use-global-map (make-composed-keymap dwcB--global-map global-map)))
   )
 
 (defun dwcB--reset-global-map ()
   "Set the current global map to Emacs default, global-map."
-  (if (eq global-map dwcB--global-map)
-      (current-global-map)
+  (when (eq (current-global-map) dwcB--global-map)
     (use-global-map global-map))
   )
 
@@ -176,6 +175,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   "Accepts a binding configuration and converts it into a key/command alist"
 
   ;; needs to handle the H-i problem (peculiarity with emacs key binding architecture leaves C-i broken)
+  ;; HYDRA - needs to append C-modifier set into no-modifier set for hydra
   (let ((modifiers '(("" no-modifier)
                      ("C-" C-modifier)
                      ("M-" M-modifier)
@@ -238,11 +238,8 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
                         (let ((map (make-sparse-keymap)))
                           (mapc (lambda (binding)
                                   (define-key map (kbd (car binding)) (cdr binding)))
-                                BINDS
-                                )
-                          map
-                          ))))
-
+                                BINDS)
+                          map))))
       ;; Add major, window, and general binds into dwcB-map
       (mapc (apply-partially 'apply (lambda (BINDS PREFIX)
                                       "Add BINDS to dwcB-map. If PREFIX non-nil, add under PREFIX"
@@ -258,14 +255,12 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
             `((,gen-binds  nil)
               (,env-binds  ,dwcB-major-prefix)
               (,wnd-binds  ,dwcB-inter-buffer-prefix)))
-
       ;; If a base map, add those binds to dwcB-map
       (when base-map
         (unless (keymapp base-map)
           (error ":base must be a keymap"))
         (setq dwcB-map (make-composed-keymap dwcB-map base-map))
         )
-
       ;; Inherit dwcB-map from parent-map if it exists
       (when parent-map
         (if (and (boundp parent-map) (keymapp (symbol-value parent-map)))
@@ -275,7 +270,6 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
                 (set-keymap-parent dwcB-map (cdr entry))
               (error "parent-map must be a keymap or a known dwcB key")))
           ))
-
       ;; Decide when this dwcB-map goes into effect (globally, during a certain mode, etc)
       (if key
           (let ((mode-map-assoc (cons key dwcB-map)))
