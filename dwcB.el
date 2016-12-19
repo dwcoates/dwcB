@@ -1,57 +1,10 @@
 ;;; Code:
 
 (require 'cl)
+(require 'hydra)
 
-;; temp
+;; FIXME -- should be generic
 (add-to-list 'load-path "~/workspace/dwcB")
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;; KEY GENERICS ;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; Direction
-(defconst dwcB-backward-key "j")
-(defconst dwcB-forward-key "l")
-(defconst dwcB-downward-key "k")
-(defconst dwcB-upward-key "i")
-;; Beginning/End
-(defconst dwcB-beginning-key "u")
-(defconst dwcB-end-key "o")
-;; Search
-(defconst dwcB-search-alpha-key "p")
-(defconst dwcB-search-beta-key "y")
-;; Bigger/Smaller
-(defconst dwcB-bigger-key ">")
-(defconst dwcB-smaller-key "<")
-;; Add/Subtract
-(defconst dwcB-shift-left-key "n")  ;; I dont think this is needed
-(defconst dwcB-shift-right-key "m") ;; ditto
-;; Kill
-(defconst dwcB-kill-element-key "d")  ;; should be delete alpha
-(defconst dwcB-kill-big-key "a")      ;; should be delete beta
-(defconst dwcB-kill-or-save-key "s")
-(defconst dwcB-remove-key "z")
-;; Create
-(defconst dwcB-yank-key "f")    ;; should be insert alpha
-(defconst dwcB-insert-key "v")  ;; shoulb be insert beta
-(defconst dwcB-note-key "+")
-;; Transpose
-(defconst dwcB-transpose-key "t") ;; should be switch
-;; Undo/Redo
-(defconst dwcB-undo-key "r")
-(defconst dwcB-redo-key "t")
-;; Query
-(defconst dwcB-query-key "?")
-(defconst dwcB-description-key "/")
-;; Compile/Interpret
-(defconst dwcB-evaluate-key ":")
-(defconst dwcB-compile-key ";")
-;; Present
-(defconst dwcB-present-key "/")
-(defconst dwcB-enter-key "RET")
-(defconst dwcB-edit-key "*")
-(defconst dwcB-mark-key "&")
-(defconst dwcB-sort-key "#")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -231,6 +184,17 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
        "Must provide general (:gen-binds), environment (:env-binds) or
        window (:wnd-binds) bindings."))
 
+    ;; build the gen-binds straight into the dwcB-map
+    ;; apply each of the binds (including gen-binds) to defhydra into dwcB-map
+    ;; in other words, all prefixing is now done via defhydra
+    ;; each of these apply's will have to define the other shiftors to call a function that kills
+    ;; hydra and then starts that shiftors hydra as a new isntance
+
+
+    ; gen-binds + de-shifted C-binds get added to a hydra via dwcB-map
+    ; env-binds get added to a hydra via dwcB-map
+    ; wnd-binds get added to a hydra via dwcB-map
+
 
     (let* ((dwcB-map (make-sparse-keymap))
            (build-map (lambda (BINDS)
@@ -239,22 +203,27 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
                           (mapc (lambda (binding)
                                   (define-key map (kbd (car binding)) (cdr binding)))
                                 BINDS)
-                          map))))
-      ;; Add major, window, and general binds into dwcB-map
+                          map)))
+           )
+      ; gen-binds shift mappings into dwcB-map
+      (set dwcB-map (make-composed-keymap (funcall build-map (car gen-binds)) dwcB-map))
+      (define-key dwcB-map (kbd "C-v") (funcall build-map (cadr gen-binds)))
+
+      ;; Add major, window, and general binds modals mappings into dwcB-map
       (mapc (apply-partially 'apply (lambda (BINDS PREFIX)
                                       "Add BINDS to dwcB-map. If PREFIX non-nil, add under PREFIX"
                                       (when BINDS
                                         (let* ((no-prefix-binds (car BINDS))
                                                (ctrl-x-binds (cadr BINDS))
                                                (map (funcall build-map no-prefix-binds)))
-                                          (define-key map (kbd "C-x") (funcall build-map ctrl-x-binds))
-                                          (if PREFIX
-                                              (define-key dwcB-map (kbd PREFIX) map)
-                                            (setq dwcB-map (make-composed-keymap dwcB-map map)))
+                                          (define-key map (kbd "C-v") )
+                                          (setq dwcB-map (make-composed-keymap dwcB-map map)))
                                           ))))
-            `((,gen-binds  nil)
-              (,env-binds  ,dwcB-major-prefix)
-              (,wnd-binds  ,dwcB-inter-buffer-prefix)))
+
+            `((,gen-binds  nil)))
+
+      (,env-binds  ,dwcB-major-prefix)
+      (,wnd-binds  ,dwcB-inter-buffer-prefix)
       ;; If a base map, add those binds to dwcB-map
       (when base-map
         (unless (keymapp base-map)

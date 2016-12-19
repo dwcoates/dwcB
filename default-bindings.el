@@ -1,5 +1,54 @@
 ;;; Code:
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;; KEY GENERICS ;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Direction
+(defconst dwcB-backward-key "j")
+(defconst dwcB-forward-key "l")
+(defconst dwcB-downward-key "k")
+(defconst dwcB-upward-key "i")
+;; Beginning/End
+(defconst dwcB-beginning-key "u")
+(defconst dwcB-end-key "o")
+;; Search
+(defconst dwcB-search-alpha-key "p")
+(defconst dwcB-search-beta-key "y")
+;; Bigger/Smaller
+(defconst dwcB-bigger-key ">")
+(defconst dwcB-smaller-key "<")
+;; Add/Subtract
+(defconst dwcB-shift-left-key "n")  ;; I dont think this is needed
+(defconst dwcB-shift-right-key "m") ;; ditto
+;; Kill
+(defconst dwcB-kill-element-key "d")  ;; should be delete alpha
+(defconst dwcB-kill-big-key "a")      ;; should be delete beta
+(defconst dwcB-kill-or-save-key "s")
+(defconst dwcB-remove-key "z")
+;; Create
+(defconst dwcB-yank-key "f")    ;; should be insert alpha
+(defconst dwcB-insert-key "v")  ;; shoulb be insert beta
+(defconst dwcB-note-key "+")
+;; Transpose
+(defconst dwcB-transpose-key "t") ;; should be switch
+;; Undo/Redo
+(defconst dwcB-undo-key "r")
+(defconst dwcB-redo-key "t")
+;; Query
+(defconst dwcB-query-key "?")
+(defconst dwcB-description-key "/")
+;; Compile/Interpret
+(defconst dwcB-evaluate-key ":")
+(defconst dwcB-compile-key ";")
+;; Present
+(defconst dwcB-present-key "/")
+(defconst dwcB-enter-key "RET")
+(defconst dwcB-edit-key "*")
+(defconst dwcB-mark-key "&")
+(defconst dwcB-sort-key "#")
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;; DWCB  GLOBAL ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
