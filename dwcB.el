@@ -8,7 +8,7 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;; MAPS/PREFIXES ;;;;;;;;
+;;;;;;;;;;;; MAPS ;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar dwcB--global-map (make-sparse-keymap)
@@ -16,20 +16,29 @@
 (defvar dwcB--inter-buffer-map (make-sparse-keymap)
   "Prefix map for window, buffer, and frame commands.")
 
-(defconst dwcB-major-prefix "C-e"
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; PREFIXES ;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defconst dwcB-major-prefix "c"
   "dwc-binding prefix used as default for major modes. Major mode commands may be
 bound to keys outside of prefix (see dwcB-add-major-mode-map).")
-(defconst dwcB-inter-buffer-prefix "C-w"
+(defconst dwcB-general-prefix "x"
+  "dwc-binding prefix used as default for general emacs editing/navigation commands.")
+(defconst dwcB-inter-buffer-prefix "z"
   "dwc-binding prefix used as default for inter-buffer navigation and editing.")
+(defconst dwcB-secondary-prefix "v"
+  "dwc-binding prefix used as a secondary prefix for a given namespace (major, general, or inter-buffer).")
 
-(define-key dwcB--global-map (kbd dwcB-inter-buffer-prefix) dwcB--inter-buffer-map)
+
+;; FIXME -- I'm pretty sure this is crap
+;(define-key dwcB--global-map (kbd dwcB-inter-buffer-prefix) dwcB--inter-buffer-map)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; SAVES ;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar dwcB--primary-alist '()
-  "first searched when setting local-map. Then looks outside")
+(defvar dwcB--primary-alist '() "first searched when setting local-map. Then looks outside")
 (defvar dwcB--minor-alist '())
 (defvar dwcB--minor-alist--saved '() "list of keymaps to be appended to minor-mode-map-alist")
 (defvar dwcB--primary-alist--saved '())
@@ -209,21 +218,55 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
       (set dwcB-map (make-composed-keymap (funcall build-map (car gen-binds)) dwcB-map))
       (define-key dwcB-map (kbd "C-v") (funcall build-map (cadr gen-binds)))
 
-      ;; Add major, window, and general binds modals mappings into dwcB-map
-      (mapc (apply-partially 'apply (lambda (BINDS PREFIX)
-                                      "Add BINDS to dwcB-map. If PREFIX non-nil, add under PREFIX"
-                                      (when BINDS
-                                        (let* ((no-prefix-binds (car BINDS))
-                                               (ctrl-x-binds (cadr BINDS))
-                                               (map (funcall build-map no-prefix-binds)))
-                                          (define-key map (kbd "C-v") )
-                                          (setq dwcB-map (make-composed-keymap dwcB-map map)))
-                                          ))))
 
-            `((,gen-binds  nil)))
+      ;; --------------------------------------------------------------------------------------------
+      ;; those three hydra versions for the binds then need to be mapped into the three global hydras
+      ;; for each of the binds. e.g., the (none ctrl alt) versions attached to their corresponding keys
+      ;; ("c"    ; the complete version. Has no-modifier, C-modifier, M-modifier.
+      ;;         ; Equivalent to the env global hydra.
+      ;;         ; Have capital C be equal to next hydra. This would be a future feature.
+      ;;  "C-c"  ; C-modifier is now a no-modifier. No direct access to former no-modifier or M-modifier.
+      ;;  "M-c"  ; M-modifier is now a no-modifier. No direct access to former no-modifier or C-modifier.
+      ;;  )
+      ;;
+      ;; Each of the three hydra versions would feature these hydra attachments. THIS IS OKAY TO DO,
+      ;; as per my scratch work:
+      ; (defhydra my-up-hydra (global-map "<f3>")
+      ;   ("x"  my-up-hydra/body "inner"))  ; my-up-hydra has an entry for itself. Works as expected.
+      ;; --------------------------------------------------------------------------------------------
 
-      (,env-binds  ,dwcB-major-prefix)
-      (,wnd-binds  ,dwcB-inter-buffer-prefix)
+
+      ;; --------------------------------------------------------------------------------------------
+      ;; Pseudo sample hydra:
+      ;(defhydra env-hydra ()
+      ;  (car (unpack env-binds))
+      ;  ;; build and insert secondary env-binds here
+      ;
+      ;  ;; access other modals
+      ;  (unpack wnd-hydra-versions)
+      ;  (unpack env-hydra-versions)
+      ;  (unpack gen-hydra-versions)
+      ; )
+      ;;
+      ;; Pseudo sample for hydra versions
+      ; (set env-hydra-versions
+      ;  (dwcB-major-prefix env-hydra/body)
+      ;  ((concat "C-" dwcB-major-prefix) env-hydra-ctrl/body)
+      ;  ((concat "M-" dwcB-major-prefix) env-hydra-meta/body))
+      ;; --------------------------------------------------------------------------------------------
+
+
+      ;; --------------------------------------------------------------------------------------------
+      ;; NOTE: It will have to save the binds that are used so that it can handle updated hydras by
+      ;;       concatenating the saved bind and the new bind and using that to reset the hydra. UNLESS
+      ;;       Hydra happens to already handle upgrades naturally.
+      ;; -----------------------------------------------
+      ;; NOTE: It has to handle the hydra names properly. Can't use generic hydra names, must name
+      ;;       them according to the associated major-mode, for env-binds and secondary env-binds.
+      ;;       If it doesn't, all env-hydras would overwrite eachother.
+      ;; --------------------------------------------------------------------------------------------
+
+
       ;; If a base map, add those binds to dwcB-map
       (when base-map
         (unless (keymapp base-map)
