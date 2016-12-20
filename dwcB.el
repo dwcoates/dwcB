@@ -13,8 +13,6 @@
 
 (defvar dwcB--global-map (make-sparse-keymap)
   "alist for tracking dwcB versions of general keymaps")
-(defvar dwcB--inter-buffer-map (make-sparse-keymap)
-  "Prefix map for window, buffer, and frame commands.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;; PREFIXES ;;;;;;;;;;;
@@ -30,9 +28,6 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
 (defconst dwcB-secondary-prefix "v"
   "dwc-binding prefix used as a secondary prefix for a given namespace (major, general, or inter-buffer).")
 
-
-;; FIXME -- I'm pretty sure this is crap
-;(define-key dwcB--global-map (kbd dwcB-inter-buffer-prefix) dwcB--inter-buffer-map)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; SAVES ;;;;;;;;;;;;
