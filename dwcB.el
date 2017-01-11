@@ -6,7 +6,6 @@
 ;; FIXME -- should be generic
 (add-to-list 'load-path "~/workspace/dwcB")
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; MAPS ;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -15,18 +14,31 @@
   "An alist for tracking dwcB versions of general keymaps.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;; PREFIXES ;;;;;;;;;;;
+;;;;;;;;; NAMESPACES ;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defconst dwcB-major-prefix "c"
+(defconst dwcB-env-key "c"
   "The `dwc-binding' prefix used as default for major modes.
 Major mode commands may be bound to keys outside of prefix (see `dwcB-add-major-mode-map').")
-(defconst dwcB-general-prefix "x"
+(defconst dwcB-gen-key "x"
   "The `dwc-binding' prefix used as default for general Emacs editing/navigation commands.")
-(defconst dwcB-inter-buffer-prefix "z"
+(defconst dwcB-wnd-key "z"
   "The `dwc-binding' prefix used as default for inter-buffer navigation and editing.")
-(defconst dwcB-secondary-prefix "v"
-  "The `dwc-binding' prefix used as a secondary prefix for a given namespace (major, general, or inter-buffer).")
+
+(defconst dwcB--greater-namespaces '(("env" . dwcB-env-key)
+                                     ("gen" . dwcB-gen-key)
+                                     ("wnd" . dwcB-wnd-key))
+  "Namespace names and their keys."
+  )
+(defconst dwcB--lesser-namespaces '(("std" . "") ("alt" . "C-"))
+  "Lesser namespaces and their access modifiers in modal mode."
+  )
+(defconst dwcB--modal-rights '(("primary" . "C-") ("secondary" . "M-"))
+  "Modal modes and the bindings they grab to put in the modal space.
+E.g., `primary' modal mode means that all keys
+with a control modifier in that lesser namespace are now also
+have modal access.  `primary' is the default, i.e., the one
+entered automatically from insert mode."  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -143,18 +155,65 @@ Major mode commands may be bound to keys outside of prefix (see `dwcB-add-major-
     (apply 'append
            (mapcar (apply-partially 'apply
                                     (lambda (modifier bindings)
-                                      "Add a modifier to all in a binding-list"
+                                      "Add a modifier to all in a binding-list."
                                       (mapcar (lambda (bind) (cons (concat modifier (car bind))
                                                                    (cdr bind)))
                                               bindings)))
-                   (remove-if-not #'cdr (mapcar (lambda (modifier)
-                                                  "Produce a modifier/binding-list association"
-                                                  `(,(car modifier)
-                                                    ,(plist-get binding-config (cadr modifier))))
-                                                modifiers)
-                                                 )))
+                   (remove-if-not #'cdr (mapcar
+                                         (lambda (modifier)
+                                           "Produce a modifier/binding-list association"
+                                           `(,(car modifier)
+                                             ,(plist-get binding-config (cadr modifier))))
+                                         modifiers))))
     )
   )
+
+      ;; need a function that will produce a cycled hydra.
+
+
+      (defun dwcB--make-hydra-name (greater-ns lesser-ns modal-r)
+        (unless (assoc greater-ns dwcB--greater-namespaces)
+          (error (concat "Invalid greater namespace, '" greater-ns "'")))
+        (unless (assoc lesser-ns dwcB--lesser-namespaces)
+          (error (concat "Invalid lesser namespace, '" lesser-ns "'")))
+        (unless (member modal-r dwcB--modal-rights)
+          (error (concat "Invalid modal right, '" modal-r "'")))
+
+        (make-symbol (concat "dwcB/" greater-ns "-binds--" lesser-ns "-" modal-r)))
+
+      (defun dwcB--det-neighbors-refs (neighbors)
+        "Returns a list of binds for a defhydra. Should be sent a
+list two (out of three) greater namespaces, to return a list of
+four greater+lesser+primary hydra/key conses."
+        (let ((make-pair (lambda (greater lesser)
+                           "Return modal-mode key for greater/lesser combo"
+                           (concat (cdr lesser) (cdr greater)))))
+          (apply 'append
+           (mapcar (lambda (greater)
+                     "Returns cons of exposed simple greater ns binding names/keys pairs"
+                     (mapcar (lambda (lesser)
+                               (cons
+                                (dwcB--make-hydra-name (car greater) (car lesser) "primary")
+                                (funcall make-pair greater lesser)))
+                             dwcB--lesser-namespaces))
+                   neighbors))))
+
+      (defun dwcB--build-hydra (namespace bindings)
+        "Returns a hydra for greater NAMESPACE (`env', `wnd' or
+`gen' binds) using BINDINGS, which is a cons of standard and
+alternative lesser namespace binds (`std' or `alt' binds)."
+          (let* ((ns (cl-position namespace))
+                 ; Determine the symbol names for the other two greater namespaces.
+                 (other-ns (if ns
+                               (dwcB--det-neighbors-refs (delete ns dwcB--greater-namespaces))
+                             (error (concat "'" ns "'"" is not a real namespace")))))
+
+
+                 )
+
+
+            )
+          )
 
 
 (defun dwcB-configure (&rest args)
@@ -215,21 +274,24 @@ Major mode commands may be bound to keys outside of prefix (see `dwcB-add-major-
 
 
       ;; --------------------------------------------------------------------------------------------
-      ;; those three hydra versions for the binds then need to be mapped into the three global hydras
-      ;; for each of the binds. e.g., the (none ctrl alt) versions attached to their corresponding keys
-      ;; ("c"    ; the complete version. Has no-modifier, C-modifier, M-modifier.
-      ;;         ; Equivalent to the env global hydra.
-      ;;         ; Have capital C be equal to next hydra. This would be a future feature.
-      ;;  "C-c"  ; C-modifier is now a no-modifier. No direct access to former no-modifier or M-modifier.
-      ;;  "M-c"  ; M-modifier is now a no-modifier. No direct access to former no-modifier or C-modifier.
-      ;;  )
+      ;; those three hydra versions for the binds then need to be
+      ;; mapped into the three global hydras for each of the
+      ;; binds. e.g., the (none ctrl alt) versions attached to their
+      ;; corresponding keys
+      ;; ("c" ; Standard namespace access key. switch between Ctrl having modal
+      ;;      ; (default) rights and Meta having modal rights.
+      ;; "C-c" ; Alternative namespace access key. Same as "c".
+      ;; )
       ;;
-      ;; Each of the three hydra versions would feature these hydra attachments. THIS IS OKAY TO DO,
-      ;; as per my scratch work:
-      ; (defhydra my-up-hydra (global-map "<f3>")
-      ;   ("x"  my-up-hydra/body "inner"))  ; my-up-hydra has an entry for itself. Works as expected.
+      ;; Each of the greater namespaces would feature these hydra
+      ;; attachments. THIS IS OKAY TO DO, as per my scratch work:
+      ;; (defhydra my-up-hydra (global-map "<f3>")
+      ;;   ("x"  my-up-hydra/body "inner"))  ; my-up-hydra has an entry
+      ;;                                     ;   for itself. Works as expected.
       ;; --------------------------------------------------------------------------------------------
 
+
+      ;; FEATURE IDEA: using traditional shiftor access in modal mode exits modal mode.
 
       ;; --------------------------------------------------------------------------------------------
       ;; Pseudo sample hydra:
@@ -245,11 +307,22 @@ Major mode commands may be bound to keys outside of prefix (see `dwcB-add-major-
       ;;
       ;; Pseudo sample for hydra versions
       ; (set env-hydra-versions
-      ;  (dwcB-major-prefix env-hydra/body)
-      ;  ((concat "C-" dwcB-major-prefix) env-hydra-ctrl/body)
-      ;  ((concat "M-" dwcB-major-prefix) env-hydra-meta/body))
+      ;  (dwcB-env-prefix env-hydra/body)
+      ;  ((concat "C-" dwcB-env-prefix) env-hydra-ctrl/body)
+      ;  ((concat "M-" dwcB-env-prefix) env-hydra-meta/body))
+      ;; Lesser namespace:
+      ; (defun build-lesser ()
+      ;   ()
+      ; )
       ;; --------------------------------------------------------------------------------------------
 
+      ; func that takes a greater namespace. It derives the other two namespaces.
+      ; creates a hydra that contains greater-name+lesser-name-standard,
+      ; greater-name+lesser-name-alternative (symbol names) for each of the other two
+      ; namespaces. For the namespace itself, it calls the build-lesser function for the
+      ; standard and alternative binds.The build-lesser function receives a set of bindings,
+      ; and returns a cons cell for which the car is the primary version of the binds, and the
+      ; cdr is the secondary. Build lesser has to of course pu
 
       ;; --------------------------------------------------------------------------------------------
       ;; NOTE: It will have to save the binds that are used so that it can handle updated hydras by
@@ -288,8 +361,9 @@ Major mode commands may be bound to keys outside of prefix (see `dwcB-add-major-
       ))
   )
 
-
-;(require 'default-bindings)
+;; Delay loading defaults until after init. This way users can easily
+;; set bindings keys in .emacs.d.
+(add-hook 'after-init-hook (lambda () (require 'default-bindings)))
 
 (provide 'dwcB)
 
