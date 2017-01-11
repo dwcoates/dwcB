@@ -12,7 +12,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar dwcB--global-map (make-sparse-keymap)
-  "alist for tracking dwcB versions of general keymaps")
+  "An alist for tracking dwcB versions of general keymaps.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;; PREFIXES ;;;;;;;;;;;
