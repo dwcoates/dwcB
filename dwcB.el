@@ -19,23 +19,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defconst dwcB-major-prefix "c"
-  "dwc-binding prefix used as default for major modes. Major mode commands may be
-bound to keys outside of prefix (see dwcB-add-major-mode-map).")
+  "The `dwc-binding' prefix used as default for major modes.
+Major mode commands may be bound to keys outside of prefix (see `dwcB-add-major-mode-map').")
 (defconst dwcB-general-prefix "x"
-  "dwc-binding prefix used as default for general emacs editing/navigation commands.")
+  "The `dwc-binding' prefix used as default for general Emacs editing/navigation commands.")
 (defconst dwcB-inter-buffer-prefix "z"
-  "dwc-binding prefix used as default for inter-buffer navigation and editing.")
+  "The `dwc-binding' prefix used as default for inter-buffer navigation and editing.")
 (defconst dwcB-secondary-prefix "v"
-  "dwc-binding prefix used as a secondary prefix for a given namespace (major, general, or inter-buffer).")
+  "The `dwc-binding' prefix used as a secondary prefix for a given namespace (major, general, or inter-buffer).")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;; SAVES ;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar dwcB--primary-alist '() "first searched when setting local-map. Then looks outside")
+(defvar dwcB--primary-alist '()
+  "First searched when setting local-map, then looks outside.")
 (defvar dwcB--minor-alist '())
-(defvar dwcB--minor-alist--saved '() "list of keymaps to be appended to minor-mode-map-alist")
+(defvar dwcB--minor-alist--saved '()
+  "List of keymaps to be appended to `minor-mode-map-alist'.")
 (defvar dwcB--primary-alist--saved '())
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -53,7 +55,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
 
 (defun dwcB--setup ()
   (progn
-    (keyboard-translate ?\C-i ?\H-i) ; this is needed because emacs wont let you bind C-i naturally
+    (keyboard-translate ?\C-i ?\H-i) ; because emacs won't let you bind C-i naturally
     (dwcB--set-global-map)
     (add-hook 'after-change-major-mode-hook 'dwcB--major-mode-update)
     (dwcB--major-mode-update)
@@ -78,17 +80,19 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   )
 
 (defun dwcB--reset-global-map ()
-  "Set the current global map to Emacs default, global-map."
+  "Set the current global map to Emacs default, `global-map'."
   (when (eq (current-global-map) dwcB--global-map)
     (use-global-map global-map))
   )
 
 (defun dwcB--setup-minor-maps ()
+  "Configure the minor mappings."
   (setq dwcB--minor-alist--saved minor-mode-overriding-map-alist)
   (setq minor-mode-overriding-map-alist dwcB--minor-alist)
   )
 
 (defun dwcB--teardown-minor-maps ()
+  "Remove the dwcB minor maps and restore originals."
   (setq minor-mode-overriding-map-alist dwcB--minor-alist--saved)
   )
 
@@ -102,6 +106,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
   )
 
 (defun dwcB--major-mode-clear ()
+  "Restore origal keymap for `major-mode'."
   (let ((mode-map  (assoc major-mode dwcB--primary-alist--saved)))
     (when mode-map
       (use-local-map (cdr mode-map))
@@ -109,27 +114,22 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
     )
   )
 
-(defun dwcB--save (MODE-MAP ALIST)
-  (let ((entry-mode-map (assoc (car MODE-MAP) (symbol-value ALIST))))
+(defun dwcB--save (mode-map alist)
+  "Save MODE-MAP to ALIST.  Used for saving default keymaps indiscriminantly."
+  (let ((entry-mode-map (assoc (car mode-map) (symbol-value alist))))
     (if entry-mode-map
-        ;; amend set value in place. Don't want this to just add to list.
-        ;; this can always just go if it causes problems
-        ;; (setf (cdr (assoc s(car MODE-MAP) ALIST))
-        ;;       (make-composed-keymap `(,(cdr MODE-MAP)
-        ;;                               ,(cdr entry-mode-map)))
-        ;;       )
-        (add-to-list ALIST
-                     (cons (car MODE-MAP)
-                           (make-composed-keymap `(,(cdr MODE-MAP)
+        (add-to-list alist
+                     (cons (car mode-map)
+                           (make-composed-keymap `(,(cdr mode-map)
                                                    ,(cdr entry-mode-map)))
                            ))
-      (add-to-list ALIST MODE-MAP)
+      (add-to-list alist mode-map)
       )
     )
   )
 
 (defun read-binds (binding-config)
-  "Accepts a binding configuration and converts it into a key/command alist"
+  "Accept BINDING-CONFIG and convert it into a key/command alist."
 
   ;; needs to handle the H-i problem (peculiarity with emacs key binding architecture leaves C-i broken)
   ;; HYDRA - needs to append C-modifier set into no-modifier set for hydra
@@ -158,9 +158,9 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
 
 
 (defun dwcB-configure (&rest args)
-  "Configures dwcB binding.
+  "Configure `dwcB-binding' with ARGS.
 :key - A minor mode or major mode name to configure bindings to.
-       A keymap name to which to correlate a dwcB keymap. (useful
+       A keymap name to which to correlate a dwcB keymap.  (useful
        if you want to build map hierarchies using :parent).
        Ommit to bind globally.
 :base - A base map with which to compose the provided bindings.
@@ -186,7 +186,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
     (unless (or (or gen-binds env-binds wnd-binds) (and key (or parent-map base-map)))
       (error
        "Must provide general (:gen-binds), environment (:env-binds) or
-       window (:wnd-binds) bindings."))
+       window (:wnd-binds) bindings"))
 
     ;; build the gen-binds straight into the dwcB-map
     ;; apply each of the binds (including gen-binds) to defhydra into dwcB-map
@@ -275,7 +275,7 @@ bound to keys outside of prefix (see dwcB-add-major-mode-map).")
           (let ((entry (assoc parent-map dwcB--primary-alist)))
             (if entry
                 (set-keymap-parent dwcB-map (cdr entry))
-              (error "parent-map must be a keymap or a known dwcB key")))
+              (error "`:parent' arg must be a keymap or a known dwcB key")))
           ))
       ;; Decide when this dwcB-map goes into effect (globally, during a certain mode, etc)
       (if key
