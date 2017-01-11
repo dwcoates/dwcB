@@ -1,7 +1,8 @@
 ;;; Code:
 
 (require 'cl)
-(require 'hydra)
+(unless (require 'hydra nil nil)
+  (error "dwcB could not load Emacs package 'hydra'. dwcB depends entirely on hydra."))
 
 ;; FIXME -- should be generic
 (add-to-list 'load-path "~/workspace/dwcB")
@@ -33,7 +34,7 @@ Major mode commands may be bound to keys outside of prefix (see `dwcB-add-major-
 (defconst dwcB--lesser-namespaces '(("std" . "") ("alt" . "C-"))
   "Lesser namespaces and their access modifiers in modal mode."
   )
-(defconst dwcB--modal-rights '(("primary" . "C-") ("secondary" . "M-"))
+(defconst dwcB--prefixes '(("primary" . "C-") ("secondary" . "M-"))
   "Modal modes and the bindings they grab to put in the modal space.
 E.g., `primary' modal mode means that all keys
 with a control modifier in that lesser namespace are now also
@@ -62,8 +63,7 @@ entered automatically from insert mode."  )
   :global t
   (if dwcB-mode
       (dwcB--setup)
-    (dwcB--teardown))
-  )
+    (dwcB--teardown)))
 
 (defun dwcB--setup ()
   (progn
@@ -140,18 +140,120 @@ entered automatically from insert mode."  )
     )
   )
 
+(defun prep-bind-set (bindings)
+  "Modal binds want `upcase' keys in BINDINGS to be convertered to uppercase.
+Modeless bindings want them to be prefixed with 'S-' (e.g., in practice,
+'A' vs 'C-S-a')."
+
+  )
+
+(defun dwcB--mod-key (bindings mod)
+  "Modify BINDINGS with MOD.
+MOD is a prefix to concatenate (e.g., 'C-'), or a funct with which to modify it
+\(e.g., `upcase')."
+  (mapcar
+   (lambda (b)
+     (let* ((key (car b))
+            (func (cdr b))
+            (new-key
+             (cond ((eq (symbol-value 'mod) 'shift)
+                    (concat "S-" key)
+                    )
+                   ((eq (symbol-value 'mod) 'up)
+                    (upcase key))
+                   (t
+                    (error (concat "Invalid MOD, '" (symbol-name mod) "'."))))))
+       `(,new-key . ,func)))
+   bindings)
+  )
+
+(defun dwcB--handle-upcase (bindings mod)
+  "Handle the upcase keys in BINDINGS with MOD.
+BINDINGS is a binding alist.  This function will flatten a prefix binding alist,
+\(i.e., it will flatten the 'upcase' and 'downcase' alists into one.)"
+  (append
+   (cdr (assoc "downcase" bindings))
+   (dwcB--mod-key (cdr (assoc "upcase" bindings)) mod))
+  )
+
+(defun dwcB--flatter-case-bind-set (case-bind-set)
+  `(,(cons "upcase" (plist-get case-bind-set :upcase))
+    ,(cons "downcase" (plist-get case-bind-set :downcase)))
+  )
+
+(defun dwcB--flatten-prefx-bind-set (prfx-bind-set)
+  `(,(cons "primary" (plist-get prefixs-bind-set :primary))
+    ,(cons "secondary" (plist-get prefixs-bind-set :secondary)))
+  )
+
+
 (defun read-binds (binding-config)
   "Accept BINDING-CONFIG and convert it into a key/command alist."
 
   ;; needs to handle the H-i problem (peculiarity with emacs key binding architecture leaves C-i broken)
   ;; HYDRA - needs to append C-modifier set into no-modifier set for hydra
-  (let ((modifiers '(("" no-modifier)
-                     ("C-" C-modifier)
-                     ("M-" M-modifier)
-                     ("C-S-" C-S-modifier)
-                     ("M-S-" M-S-modifier)
-                     ("C-M-" C-M-modifier)
-                     ("C-M-S-" C-M-S-modifier))))
+  ;;
+  ;;    ("std"
+  ;;     ("primary"
+  ;;      ("upcase" ("1"
+  ;;                 "2"
+  ;;                 "..."
+  ;;                 ))
+  ;;      ("downcase" ("3"
+  ;;                   "4"
+  ;;                   "..."
+  ;;                   ))
+  ;;     )
+  ;;     ("secondary"
+  ;;      (...
+  ;;       ...)
+  ;;     )
+  ;;    )
+
+  (let ((std (car binding-config))
+        (alt (cadr binding-config))
+        (get-prf (lambda (prefixd-bind-set)
+                   (plist-get prefixs-bind-set :primary)
+                   (plist-get prefixs-bind-set :secondary)
+                   ))
+        )
+    `(("std" . ()))
+    ()
+
+    )
+  (mapcar (lambda ()
+            )
+          binding-config)
+    (apply 'append
+           (mapcar (apply-partially 'apply
+                                    (lambda (modifier bindings)
+                                      "Add a modifier to all in a binding-list."
+                                      (mapcar (lambda (bind) (cons (concat modifier (car bind))
+                                                                   (cdr bind)))
+                                              bindings)))
+                   (remove-if-not #'cdr
+                                  (mapcar
+                                   (lambda (modifier)
+                                     "Produce a modifier/binding-list association"
+                                     `(,(car modifier)
+                                       ,(plist-get binding-config (cadr modifier))))
+                                   prefixes)))))
+
+
+(defun read-to-modeless-binds (binding-config)
+  "Read bindings into their modal form"
+  )
+(defun read-to-modal-binds (binding-config)
+  "Accept BINDING-CONFIG and convert it into a key/command alist."
+
+  ;; needs to handle the H-i problem (peculiarity with emacs key binding architecture leaves C-i broken)
+  ;; HYDRA - needs to append C-modifier set into no-modifier set for hydra
+  (lambda (binding-set)
+    "Convert upcase specification."
+    (mapcar
+     (lambda (binding) (upcase (cdr binding)))
+     binding-set)
+    )
     (apply 'append
            (mapcar (apply-partially 'apply
                                     (lambda (modifier bindings)
@@ -164,31 +266,31 @@ entered automatically from insert mode."  )
                                            "Produce a modifier/binding-list association"
                                            `(,(car modifier)
                                              ,(plist-get binding-config (cadr modifier))))
-                                         modifiers))))
-    )
-  )
+                                         modifiers)))))
 
       ;; need a function that will produce a cycled hydra.
 
 
-      (defun dwcB--make-hydra-name (greater-ns lesser-ns modal-r)
-        (unless (assoc greater-ns dwcB--greater-namespaces)
-          (error (concat "Invalid greater namespace, '" greater-ns "'")))
-        (unless (assoc lesser-ns dwcB--lesser-namespaces)
-          (error (concat "Invalid lesser namespace, '" lesser-ns "'")))
-        (unless (member modal-r dwcB--modal-rights)
-          (error (concat "Invalid modal right, '" modal-r "'")))
+(defun dwcB--make-hydra-name (greater-ns lesser-ns prefx)
+  "Make the symbol name for the hydra corresonding to GREATER-NS+LESSER-NS+PREFX."
+  (unless (assoc greater-ns dwcB--greater-namespaces)
+    (error (concat "Invalid greater-namespace, '" greater-ns "'")))
+  (unless (assoc lesser-ns dwcB--lesser-namespaces)
+    (error (concat "Invalid lesser-namespace, '" lesser-ns "'")))
+  (unless (assoc prefx dwcB--prefixes)
+    (error (concat "Invalid prefxight, '" prefx "'")))
 
-        (make-symbol (concat "dwcB/" greater-ns "-binds--" lesser-ns "-" modal-r)))
+  (make-symbol (concat "dwcB/" greater-ns "-binds--" lesser-ns "-" prefx)))
 
-      (defun dwcB--det-neighbors-refs (neighbors)
-        "Returns a list of binds for a defhydra. Should be sent a
-list two (out of three) greater namespaces, to return a list of
-four greater+lesser+primary hydra/key conses."
-        (let ((make-pair (lambda (greater lesser)
-                           "Return modal-mode key for greater/lesser combo"
-                           (concat (cdr lesser) (cdr greater)))))
-          (apply 'append
+(defun dwcB--det-neighbors-refs (neighbors)
+  "Return a list of binds for a defhydras corresponding to NEIGHBORS.
+Should be sent a list two (out of three) greater namespaces, to
+return a list of four greater+lesser+primary hydra/key conses."
+  (let ((make-pair (lambda (greater lesser)
+                     "Return modal-mode key for greater/lesser combo"
+                     (concat (cdr lesser)
+                             (symbol-value (cdr greater))))))
+    (apply 'append
            (mapcar (lambda (greater)
                      "Returns cons of exposed simple greater ns binding names/keys pairs"
                      (mapcar (lambda (lesser)
@@ -198,22 +300,38 @@ four greater+lesser+primary hydra/key conses."
                              dwcB--lesser-namespaces))
                    neighbors))))
 
-      (defun dwcB--build-hydra (namespace bindings)
-        "Returns a hydra for greater NAMESPACE (`env', `wnd' or
-`gen' binds) using BINDINGS, which is a cons of standard and
-alternative lesser namespace binds (`std' or `alt' binds)."
-          (let* ((ns (cl-position namespace))
-                 ; Determine the symbol names for the other two greater namespaces.
-                 (other-ns (if ns
-                               (dwcB--det-neighbors-refs (delete ns dwcB--greater-namespaces))
-                             (error (concat "'" ns "'"" is not a real namespace")))))
+(defun dwcB--craete-hydra-entry (bindings prefx)
+  (let* ((modal-prefix (assoc prefx prefixes))
+         (modal-space ((if modal-prefix
+                           (cdr (assoc modal-prefix bindings))
+                         (error (concat "prefix, '" prefx "', not valid."))))))
+     (append modal-space)
+  )
+  )
+
+(defmacro dwcB--make-hydra (hydra-bindings map)
+  `(apply 'defhydra ,map
+     ,hydra-bindings))
+
+(defun dwcB--build-hydra (namespace bindings map)
+  "Return a hydra for greater NAMESPACE (`env', `wnd' or `gen') using BINDINGS.
+BINDINGS is a cons of standard and alternative lesser namespace binds (`std' or
+`alt' binds).  Hydra bindings are attached to MAP.  The result of this function."
+  (let* ((ns (assoc namespace dwcB--greater-namespaces))
+         ; Determine the symbol names for the other two greater namespaces.
+         (other-ns (if ns
+                       (dwcB--det-neighbors-refs (delete ns dwcB--greater-namespaces))
+                     (error (concat "'" ns "'"" is not a real namespace")))))
 
 
-                 )
+    ;; make four hydras here. These are the lesser/prefixes combos for `namespace'
 
 
-            )
-          )
+    ;; `(defhydra (dwcB--make-hydra-name "env" "std" "primary") (global-map "<f3>")
+    ;;   ("x"  (lambda () (print "hello")) "my function!")
+    ;;   )
+    )
+  )
 
 
 (defun dwcB-configure (&rest args)
@@ -228,7 +346,7 @@ alternative lesser namespace binds (`std' or `alt' binds)."
              under a prefix key)
 :env-binds - Bindings under the major prefix
 :wnd-binds - Bindings under the window prefix"
-
+nn
   (let* ((key (plist-get args :key))
          (base-map (plist-get args :base))
          (parent-map (plist-get args :parent))
