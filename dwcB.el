@@ -176,68 +176,34 @@ BINDINGS is a binding alist.  This function will flatten a prefix binding alist,
    (dwcB--mod-key (cdr (assoc "upcase" bindings)) mod))
   )
 
-(defun dwcB--flatter-case-bind-set (case-bind-set)
-  `(,(cons "upcase" (plist-get case-bind-set :upcase))
-    ,(cons "downcase" (plist-get case-bind-set :downcase)))
+(defun dwcB--flatten-bind-set
+    `(,(cons "upcase" (plist-get case-bind-set :upcase))
+      ,(cons "downcase" (plist-get case-bind-set :downcase))))
+
+(defun dwcB--flatten-case-bind-set (case-bind-set)
+  "Turn input binds CASE-BIND-SET into alist.
+Temporary."
+  a
   )
 
 (defun dwcB--flatten-prefx-bind-set (prfx-bind-set)
-  `(,(cons "primary" (plist-get prefixs-bind-set :primary))
-    ,(cons "secondary" (plist-get prefixs-bind-set :secondary)))
+  "Turn input binds PRFX-BIND-SET into alist.
+Temporary."
+  `(,(cons "primary" (dwcB--flatten-case-bind-set
+                      (plist-get prfx-bind-set :primary)))
+    ,(cons "secondary" (dwcB--flatten-case-bind-set
+                        (plist-get prfx-bind-set :secondary))))
   )
 
 
 (defun read-binds (binding-config)
   "Accept BINDING-CONFIG and convert it into a key/command alist."
-
-  ;; needs to handle the H-i problem (peculiarity with emacs key binding architecture leaves C-i broken)
-  ;; HYDRA - needs to append C-modifier set into no-modifier set for hydra
-  ;;
-  ;;    ("std"
-  ;;     ("primary"
-  ;;      ("upcase" ("1"
-  ;;                 "2"
-  ;;                 "..."
-  ;;                 ))
-  ;;      ("downcase" ("3"
-  ;;                   "4"
-  ;;                   "..."
-  ;;                   ))
-  ;;     )
-  ;;     ("secondary"
-  ;;      (...
-  ;;       ...)
-  ;;     )
-  ;;    )
-
   (let ((std (car binding-config))
-        (alt (cadr binding-config))
-        (get-prf (lambda (prefixd-bind-set)
-                   (plist-get prefixs-bind-set :primary)
-                   (plist-get prefixs-bind-set :secondary)
-                   ))
-        )
-    `(("std" . ()))
-    ()
-
+        (alt (cdr binding-config)))
+    (cons (cons "std" (dwcB--flatten-prefx-bind-set std))
+          (cons "alt" (dwcB--flatten-prefx-bind-set alt)))
     )
-  (mapcar (lambda ()
-            )
-          binding-config)
-    (apply 'append
-           (mapcar (apply-partially 'apply
-                                    (lambda (modifier bindings)
-                                      "Add a modifier to all in a binding-list."
-                                      (mapcar (lambda (bind) (cons (concat modifier (car bind))
-                                                                   (cdr bind)))
-                                              bindings)))
-                   (remove-if-not #'cdr
-                                  (mapcar
-                                   (lambda (modifier)
-                                     "Produce a modifier/binding-list association"
-                                     `(,(car modifier)
-                                       ,(plist-get binding-config (cadr modifier))))
-                                   prefixes)))))
+  )
 
 
 (defun read-to-modeless-binds (binding-config)
@@ -309,6 +275,8 @@ return a list of four greater+lesser+primary hydra/key conses."
   )
   )
 
+(defun dwcB--)
+
 (defmacro dwcB--make-hydra (hydra-bindings map)
   `(apply 'defhydra ,map
      ,hydra-bindings))
@@ -321,7 +289,9 @@ BINDINGS is a cons of standard and alternative lesser namespace binds (`std' or
          ; Determine the symbol names for the other two greater namespaces.
          (other-ns (if ns
                        (dwcB--det-neighbors-refs (delete ns dwcB--greater-namespaces))
-                     (error (concat "'" ns "'"" is not a real namespace")))))
+                     (error (concat "'" ns "'"" is not a real namespace"))))
+         (std  (assoc "std" bindings))
+         (alt (assoc "alt" bindings)))
 
 
     ;; make four hydras here. These are the lesser/prefixes combos for `namespace'
